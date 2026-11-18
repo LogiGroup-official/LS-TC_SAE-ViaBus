@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SAE Centre Bus</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#2e1a47;--side:#24143a;--card:#38235a;--line:#523a7c;--tx:#f4eefc;--mu:#bba9d8;--ac:#a98bff;--acx:#1d0f33;--rd:#ff7a88;--ok:#4ade80;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh;padding-top:env(safe-area-inset-top,0px)}
+nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
+nav a{width:68px;padding:9px 0;border-radius:12px;text-align:center;color:var(--mu);font-size:12px;cursor:pointer}
+nav a b{display:block;font-size:20px;font-weight:400}nav a.on{background:var(--ac);color:var(--acx)}
+nav .lg{font-weight:800;color:var(--ac);margin-bottom:10px}
+main{flex:1;max-width:1100px;margin:0 auto;padding:26px 28px 60px;min-width:0}
+h1{font-size:28px;margin:0}h2{font-size:17px;margin:0 0 12px}.sub{color:var(--mu);margin:2px 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.p{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.ln{display:inline-block;min-width:54px;text-align:center;font-weight:800;font-size:17px;border-radius:9px;padding:6px 8px}
+.sv{display:flex;align-items:center;gap:14px;padding:12px 4px;border-top:1px solid var(--line);cursor:pointer}
+.sv:hover{background:rgba(255,255,255,.05)}.sv .i{flex:1;min-width:0}.sv small{color:var(--mu);display:block}
+.tm{font-weight:700;font-variant-numeric:tabular-nums}
+.tag{font-size:12px;font-weight:700;border-radius:20px;padding:2px 10px;background:rgba(245,185,66,.18);color:#f5b942}
+.tag.ok{background:rgba(74,222,128,.16);color:var(--ok)}
+.tabs{display:inline-flex;background:var(--side);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px}
+.tabs button{border:0;background:none;color:var(--mu);font:inherit;font-weight:600;padding:7px 14px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--tx)}
+select,input,textarea{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit}
+textarea{width:100%;min-height:110px}input[type=color]{padding:2px;height:34px;width:46px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:10px}label input,label select{margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+.stats div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.stats small{color:var(--mu);display:block}.stats b{font-size:20px}
+.tl{border-left:2px solid var(--ac);margin:8px 0 8px 6px;padding-left:16px;max-height:34vh;overflow:auto}.tl p{margin:0 0 10px}.tl small{color:var(--mu)}
+.pl{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:8px;min-width:860px}
+.pl .h{font-weight:700;color:var(--mu);font-size:13px;text-align:center;margin-bottom:6px}
+.cell{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px;font-size:12px;margin-bottom:6px;min-height:46px}
+.cell.s{border:1px solid var(--ac);background:rgba(169,139,255,.18);cursor:pointer}.cell.r{color:var(--mu);text-align:center}
+.scr{overflow-x:auto}
+.msgs{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow:auto;margin-bottom:12px}
+.m{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;max-width:80%}.m.me{align-self:flex-end;background:rgba(169,139,255,.2)}
+.m.imp{border-color:var(--rd)}.m small{color:var(--mu)}
+.au{max-width:420px;margin:6vh auto 0}.au input{width:100%}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--rd);min-height:20px;margin:0 0 10px;font-size:14px}
+.sw{background:none;border:0;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;width:min(560px,92vw);padding:22px;max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:9;max-width:90vw}
+@media(max-width:760px){nav{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;z-index:5;border-right:0;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}nav a{width:auto;flex:1}nav .lg{display:none}main{padding:18px 14px 100px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav id="nav" aria-label="Navigation principale"></nav>
+<main id="app"></main>
+<dialog id="dlg"></dialog>
+<div id="toast" role="alert"></div>
+<script>
+const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let me=null,L=[],ST=[],SV=[],MG=[],PR={},tab='mine',fl='Toutes',adm='lines',amode='login',live=false;
+const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['messages','✉','Messages']];
+const view=()=>(location.hash||'#journee').slice(1);
+const hm=t=>(t||'').slice(0,5);
+const tmin=t=>{const[h,m]=hm(t).split(':').map(Number);return h*60+m};
+const amp=(a,b)=>{const d=(tmin(b)-tmin(a)+1440)%1440,h=Math.floor(d/60),m=d%60;return h?`${h} h ${String(m).padStart(2,'0')}`:`${m} min`};
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const today=()=>iso(new Date());
+const fd=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const lb=c=>{const x=L.find(y=>y.code===c);return `<span class="ln" style="background:${esc(x?x.bg:'#888')};color:${esc(x?x.fg:'#111')}">${esc(c)}</span>`};
+const dlg=h=>{$('#dlg').innerHTML=h;$('#dlg').showModal()};
+const close=()=>$('#dlg').close();
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',4500)}
+const twice=(b,fn)=>{b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Confirmer la suppression';return}fn()}};
+async function act(p){const{error}=await p;if(error){toast(error.code==='23503'?'Impossible : des services utilisent encore cette ligne.':error.message);return false}await load();render();return true}
+
+async function load(){
+ const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),sb.from('services').select('*').order('day').order('start_time'),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role')]);
+ const e=r.find(x=>x.error);if(e)toast(e.error.message);
+ L=r[0].data||[];ST=r[1].data||[];SV=r[2].data||[];MG=r[3].data||[];PR=Object.fromEntries((r[4].data||[]).map(p=>[p.id,p]));
+}
+async function enter(id){
+ let{data}=await sb.from('profiles').select('*').eq('id',id).maybeSingle();
+ if(!data){await new Promise(r=>setTimeout(r,800));data=(await sb.from('profiles').select('*').eq('id',id).maybeSingle()).data}
+ me=data||{id,prenom:'',nom:'',role:'driver'};await load();subscribe();render();
+}
+function subscribe(){
+ if(live)return;live=true;
+ sb.channel('live').on('postgres_changes',{event:'*',schema:'public',table:'messages'},async()=>{
+  MG=(await sb.from('messages').select('*').order('created_at').limit(100)).data||[];if(view()==='messages')paintMsgs()})
+ .on('postgres_changes',{event:'*',schema:'public',table:'services'},async()=>{
+  SV=(await sb.from('services').select('*').order('day').order('start_time')).data||[];if(me&&!$('#dlg').open&&view()!=='messages')render()}).subscribe();
+}
+
+function authView(){
+ const su=amode==='signup';$('#nav').style.display='none';
+ $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. CA018"></label>':''}<label>E-mail<input id="fe" type="email" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
+ $('#sw').onclick=()=>{amode=su?'login':'signup';authView()};
+ $('#af').onsubmit=async e=>{
+  e.preventDefault();const er=m=>$('#er').textContent=m,email=$('#fe').value.trim(),pw=$('#fw').value;
+  if(!email||!pw)return er('Renseigne ton e-mail et ton mot de passe.');
+  if(su){
+   const p=$('#fp').value.trim(),n=$('#fn').value.trim(),m=$('#fm').value.trim();
+   if(!p||!n||!m)return er('Renseigne ton prénom, ton nom et ton matricule.');
+   if(pw.length<8)return er('Le mot de passe doit contenir au moins 8 caractères.');
+   if(pw!==$('#fc').value)return er('Les deux mots de passe sont différents.');
+   const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{prenom:p,nom:n,matricule:m}}});
+   if(error)return er(error.message);
+   if(!data.session){amode='login';authView();$('#er').textContent='Compte créé. Confirme ton e-mail, puis connecte-toi.';return}
+   await enter(data.user.id);
+  }else{
+   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
+   if(error)return er('Identifiants incorrects ou e-mail non confirmé.');
+   await enter(data.user.id);
+  }
+ };
+}
+
+function nav(v){
+ const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['quitter','⎋','Quitter']);
+ $('#nav').style.display='';
+ $('#nav').innerHTML='<div class="lg">SAE</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
+}
+function row(s){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span><span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
+const mine=()=>SV.filter(s=>s.driver_id===me.id&&s.day>=today());
+const open=()=>SV.filter(s=>!s.driver_id&&s.day>=today());
+
+function journee(){
+ const m=mine().slice(0,3),imp=[...MG].reverse().find(x=>x.important);
+ return `<h1>Bonjour ${esc(me.prenom)}</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+ ${imp?`<div class="card" style="border-color:var(--rd)"><h2>Message important</h2>${esc(imp.body)}<p class="sub" style="margin:6px 0 0">${esc(imp.author_name)}</p></div>`:''}
+ <div class="grid"><div class="card"><h2>À pourvoir</h2><p style="font-size:34px;font-weight:800;margin:0">${open().length}</p><p class="sub" style="margin:0 0 12px">services libres</p><button class="btn p" onclick="location.hash='services'">Voir les services</button></div>
+ <div class="card"><h2>Mes prochains services</h2>${m.length?m.map(row).join(''):'<p class="sub">Aucun service prévu. Prends-en un dans « À pourvoir ».</p>'}</div></div>`;
+}
+function services(){
+ const list=tab==='mine'?mine():open().filter(s=>fl==='Toutes'||s.line_code===fl);
+ return `<h1>Services</h1><p class="sub">Tes services et ceux à pourvoir.</p>
+ <div class="tabs"><button data-t="mine" class="${tab==='mine'?'on':''}">Mes services (${mine().length})</button><button data-t="open" class="${tab==='open'?'on':''}">À pourvoir (${open().length})</button></div>
+ <div class="card">${tab==='open'?`<label>Ligne <select id="fl">${['Toutes',...L.map(x=>x.code)].map(l=>`<option ${l===fl?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}${list.length?list.map(row).join(''):'<p class="sub">Rien à afficher pour le moment.</p>'}</div>`;
+}
+function planning(){
+ const d0=new Date();d0.setDate(d0.getDate()-((d0.getDay()+6)%7));
+ const days=[...Array(7)].map((_,i)=>{const d=new Date(d0);d.setDate(d0.getDate()+i);return iso(d)});
+ return `<h1>Planning</h1><p class="sub">Semaine du ${fd(days[0])} au ${fd(days[6])}.</p><div class="card scr"><div class="pl">${days.map(d=>{const l=SV.filter(s=>s.day===d&&s.driver_id===me.id);return `<div><div class="h">${fd(d)}</div>${l.length?l.map(s=>`<div class="cell s" data-id="${esc(s.id)}">${lb(s.line_code)}<br>${hm(s.start_time)}–${hm(s.end_time)}</div>`).join(''):'<div class="cell r">Repos</div>'}</div>`}).join('')}</div></div>`;
+}
+const msgHtml=()=>MG.map(m=>`<div class="m ${m.author_id===me.id?'me':''} ${m.important?'imp':''}"><small>${esc(m.author_name)} · ${new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${m.important?' · important':''}</small><br>${esc(m.body)}</div>`).join('')||'<p class="sub">Aucun message.</p>';
+function paintMsgs(){const e=$('#ms');if(e){e.innerHTML=msgHtml();e.scrollTop=e.scrollHeight}}
+function messages(){
+ return `<h1>Messages</h1><p class="sub">Régulation et équipe du dépôt.</p><div class="card"><div class="msgs" id="ms">${msgHtml()}</div><form id="mf" class="row" style="flex-wrap:nowrap"><input id="mi" style="flex:1" placeholder="Écrire un message" aria-label="Message">${me.role==='admin'?'<label style="margin:0;white-space:nowrap"><input type="checkbox" id="mx"> Important</label>':''}<button class="btn p">Envoyer</button></form></div>`;
+}
+
+function detail(id){
+ const s=SV.find(x=>x.id===id);if(!s)return;
+ const l=L.find(x=>x.code===s.line_code)||{},pts=[l.terminus_a,...ST.filter(x=>x.line_code===s.line_code).map(x=>x.name),l.terminus_b].filter(Boolean);
+ dlg(`<div class="row">${lb(s.line_code)}<h2 style="margin:0">Service ${esc(s.id)}</h2></div><p class="sub">${fd(s.day)} · ${esc(s.detail)}</p>
+ <div class="stats"><div><small>Début</small><b>${hm(s.start_time)}</b></div><div><small>Fin</small><b>${hm(s.end_time)}</b></div><div><small>Amplitude</small><b>${amp(s.start_time,s.end_time)}</b></div></div>
+ <h2>Arrêts de la ligne</h2><div class="tl">${pts.length?pts.map((p,i)=>`<p><b>${esc(p)}</b>${i===0?'<small> · terminus de départ</small>':i===pts.length-1?'<small> · terminus d’arrivée</small>':''}</p>`).join(''):'<p class="sub">Aucun arrêt défini.</p>'}</div>
+ <div class="row" style="justify-content:flex-end"><button class="btn" onclick="close()">Fermer</button>${me.role==='admin'?'<button class="btn" id="ed">Modifier</button>':''}${!s.driver_id?'<button class="btn p" id="take">Prendre ce service</button>':s.driver_id===me.id?'<button class="btn" id="drop" style="color:var(--rd)">Rendre mon service</button>':''}</div>`);
+ const g=i=>$(i);
+ if(g('#take'))g('#take').onclick=async()=>{if(await act(sb.from('services').update({driver_id:me.id}).eq('id',id).is('driver_id',null)))close()};
+ if(g('#drop'))g('#drop').onclick=async()=>{if(await act(sb.from('services').update({driver_id:null}).eq('id',id).eq('driver_id',me.id)))close()};
+ if(g('#ed'))g('#ed').onclick=()=>svcDlg(id);
+}
+
+function admin(){
+ let b;
+ if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
+ else if(adm==='services')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length} services</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+SV.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('');
+ else b=Object.values(PR).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button>`}</div>`).join('');
+ const T=(k,t)=>`<button data-a="${k}" class="${adm===k?'on':''}">${t}</button>`;
+ return `<h1>Administration</h1><p class="sub">Lignes, terminus, arrêts, services et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('users','Conducteurs')}</div><div class="card">${b}</div>`;
+}
+function lineDlg(code){
+ const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:''};
+ const names=code?ST.filter(s=>s.line_code===code).map(s=>s.name).join('\n'):'';
+ dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" ${code?'readonly':''} placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ const er=m=>$('#le').textContent=m;
+ $('#lf').onsubmit=async e=>{e.preventDefault();
+  const c=$('#l1').value.replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  if(!c)return er('Saisis un code de ligne.');
+  if(!code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
+  let r=await sb.from('lines').upsert({code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim()});
+  if(r.error)return er(r.error.message);
+  r=await sb.from('stops').delete().eq('line_code',c);if(r.error)return er(r.error.message);
+  const n=$('#l6').value.split('\n').map(v=>v.trim()).filter(Boolean);
+  if(n.length){r=await sb.from('stops').insert(n.map((name,i)=>({line_code:c,pos:i+1,name})));if(r.error)return er(r.error.message)}
+  close();await load();render();
+ };
+ const d=$('#ld');if(d)twice(d,async()=>{if(await act(sb.from('lines').delete().eq('code',code)))close()});
+}
+function svcDlg(id){
+ const s=id?SV.find(x=>x.id===id):{id:'',line_code:L[0]?L[0].code:'',day:today(),start_time:'08:00',end_time:'12:00',detail:'Dépôt · 1 tour',driver_id:null};
+ dlg(`<h2>${id?'Modifier':'Ajouter'} un service</h2><form id="sf"><div class="row"><label>Numéro<br><input id="s1" value="${esc(s.id)}" ${id?'readonly':''}></label><label>Ligne<br><select id="s2">${L.map(x=>`<option ${x.code===s.line_code?'selected':''}>${esc(x.code)}</option>`).join('')}</select></label><label>Jour<br><input id="s3" type="date" value="${esc(s.day)}"></label></div><div class="row"><label>Début<br><input id="s4" type="time" value="${hm(s.start_time)}"></label><label>Fin<br><input id="s5" type="time" value="${hm(s.end_time)}"></label></div><label>Détail<input id="s6" value="${esc(s.detail)}" style="width:100%"></label><label>Conducteur<br><select id="s7"><option value="">À pourvoir</option>${Object.values(PR).map(p=>`<option value="${p.id}" ${p.id===s.driver_id?'selected':''}>${esc(p.prenom+' '+p.nom)}</option>`).join('')}</select></label><p class="err" id="se" role="alert"></p><div class="row" style="justify-content:flex-end">${id?'<button type="button" class="btn" id="sd" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ const er=m=>$('#se').textContent=m;
+ $('#sf').onsubmit=async e=>{e.preventDefault();
+  const n=$('#s1').value.replace(/[^A-Za-z0-9-]/g,'');
+  if(!n)return er('Renseigne un numéro de service.');
+  if(!id&&SV.some(x=>x.id===n))return er('Ce numéro existe déjà.');
+  if(!$('#s2').value)return er('Crée d’abord une ligne.');
+  const r=await sb.from('services').upsert({id:n,line_code:$('#s2').value,day:$('#s3').value,start_time:$('#s4').value,end_time:$('#s5').value,detail:$('#s6').value.trim(),driver_id:$('#s7').value||null});
+  if(r.error)return er(r.error.message);
+  close();await load();render();
+ };
+ const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
+}
+
+function render(){
+ if(!me){authView();return}
+ const r=view();
+ if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
+ const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')?r:'journee';
+ nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin})[v]();
+ document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
+ document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+ document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
+ document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
+ const f=$('#fl');if(f)f.onchange=()=>{fl=f.value;render()};
+ const mf=$('#mf');if(mf){paintMsgs();mf.onsubmit=async e=>{e.preventDefault();const i=$('#mi'),t=i.value.trim();if(!t)return;
+  const{error}=await sb.from('messages').insert({author_id:me.id,author_name:(me.prenom+' '+me.nom).trim(),body:t,important:!!($('#mx')&&$('#mx').checked)});
+  if(error)toast(error.message);else i.value=''}}
+}
+window.addEventListener('hashchange',render);
+sb.auth.getSession().then(({data})=>data.session?enter(data.session.user.id):render());
+</script>
+</body>
+</html>
