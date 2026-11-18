@@ -74,7 +74,7 @@ const fd=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day
 const lb=c=>{const x=L.find(y=>y.code===c);return `<span class="ln" style="background:${esc(x?x.bg:'#888')};color:${esc(x?x.fg:'#111')}">${esc(c)}</span>`};
 const dlg=h=>{$('#dlg').innerHTML=h;$('#dlg').showModal()};
 const close=()=>$('#dlg').close();
-function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',4500)}
+function toast(m,ok){const t=$('#toast');t.style.background=ok?'var(--ok)':'var(--rd)';t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',4500)}
 const twice=(b,fn)=>{b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Confirmer la suppression';return}fn()}};
 async function act(p){const{error}=await p;if(error){toast(error.code==='23503'?'Impossible : des services utilisent encore cette ligne.':error.message);return false}await load();render();return true}
 
@@ -121,7 +121,7 @@ function authView(){
 }
 
 function nav(v){
- const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['quitter','⎋','Quitter']);
+ const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';
  $('#nav').innerHTML='<div class="lg">SAE</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
@@ -178,13 +178,14 @@ function admin(){
 function lineDlg(code){
  const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:''};
  const names=code?ST.filter(s=>s.line_code===code).map(s=>s.name).join('\n'):'';
- dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" ${code?'readonly':''} placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
  const er=m=>$('#le').textContent=m;
  $('#lf').onsubmit=async e=>{e.preventDefault();
   const c=$('#l1').value.replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
   if(!c)return er('Saisis un code de ligne.');
-  if(!code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
-  let r=await sb.from('lines').upsert({code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim()});
+  if(c!==code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
+  const o={code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim()};
+  let r=await(code&&c!==code?sb.from('lines').update(o).eq('code',code):sb.from('lines').upsert(o));
   if(r.error)return er(r.error.message);
   r=await sb.from('stops').delete().eq('line_code',c);if(r.error)return er(r.error.message);
   const n=$('#l6').value.split('\n').map(v=>v.trim()).filter(Boolean);
@@ -209,17 +210,21 @@ function svcDlg(id){
  const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
 }
 
+function profil(){
+ return `<h1>Mon profil</h1><p class="sub">Ces informations sont visibles de l’équipe.</p><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%"></label><p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
+}
 function render(){
  if(!me){authView();return}
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
- const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')?r:'journee';
- nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin})[v]();
+ const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
+ nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin,profil})[v]();
  document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
  const f=$('#fl');if(f)f.onchange=()=>{fl=f.value;render()};
+ const pf=$('#pf');if(pf)pf.onsubmit=async e=>{e.preventDefault();const o={prenom:$('#p1').value.trim(),nom:$('#p2').value.trim(),matricule:$('#p3').value.trim().toUpperCase()};if(!o.prenom||!o.nom||!o.matricule){$('#pm').textContent='Renseigne ton prénom, ton nom et ton matricule.';return}const{error}=await sb.from('profiles').update(o).eq('id',me.id);if(error){$('#pm').textContent=error.message;return}Object.assign(me,o);await load();render();toast('Profil enregistré.',1)};
  const mf=$('#mf');if(mf){paintMsgs();mf.onsubmit=async e=>{e.preventDefault();const i=$('#mi'),t=i.value.trim();if(!t)return;
   const{error}=await sb.from('messages').insert({author_id:me.id,author_name:(me.prenom+' '+me.nom).trim(),body:t,important:!!($('#mx')&&$('#mx').checked)});
   if(error)toast(error.message);else i.value=''}}
