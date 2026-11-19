@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SAE Centre Bus</title>
+<title>LogiRide - Réseau Trans'Cab</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
 <style>
 :root{--bg:#2e1a47;--side:#24143a;--card:#38235a;--line:#523a7c;--tx:#f4eefc;--mu:#bba9d8;--ac:#a98bff;--acx:#1d0f33;--rd:#ff7a88;--ok:#4ade80;color-scheme:dark}
@@ -98,7 +98,7 @@ function subscribe(){
 
 function authView(){
  const su=amode==='signup';$('#nav').style.display='none';
- $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. CA018"></label>':''}<label>E-mail<input id="fe" type="email" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
+ $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion à LogiRide'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur LogiRide.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. LSTCXXX"></label>':''}<label>E-mail<input id="fe" type="email" placeholder="ex. xyz@exemple.com" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
  $('#sw').onclick=()=>{amode=su?'login':'signup';authView()};
  $('#af').onsubmit=async e=>{
   e.preventDefault();const er=m=>$('#er').textContent=m,email=$('#fe').value.trim(),pw=$('#fw').value;
@@ -123,7 +123,8 @@ function authView(){
 function nav(v){
  const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';
- $('#nav').innerHTML='<div class="lg">SAE</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ $('#nav').innerHTML='<div class="lg">LogiRide</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ $('#nav').innerHTML='<div class="lg">V0.1b</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
 }
 function row(s){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span><span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
