@@ -10,11 +10,11 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh;padding-top:env(safe-area-inset-top,0px)}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(46,26,71,.78),rgba(46,26,71,.88)),url('fond.jpg') center/cover no-repeat}
- nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
+nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:68px 0 14px;position:sticky;top:0;height:100vh}
 nav a{width:68px;padding:9px 0;border-radius:12px;text-align:center;color:var(--mu);font-size:12px;cursor:pointer}
 nav a b{display:block;font-size:20px;font-weight:400}nav a.on{background:var(--ac);color:var(--acx)}
 nav .lg{font-weight:800;color:var(--ac);margin-bottom:10px}
-main{flex:1;max-width:1100px;margin:0 auto;padding:26px 28px 60px;min-width:0}
+main{flex:1;max-width:1200px;margin:0 auto;padding:26px 28px 60px;min-width:0}
 h1{font-size:28px;margin:0}h2{font-size:17px;margin:0 0 12px}.sub{color:var(--mu);margin:2px 0 20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -37,10 +37,27 @@ label{display:block;font-weight:600;font-size:14px;margin-bottom:10px}label inpu
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
 .stats div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.stats small{color:var(--mu);display:block}.stats b{font-size:20px}
 .tl{border-left:2px solid var(--ac);margin:8px 0 8px 6px;padding-left:16px;max-height:34vh;overflow:auto}.tl p{margin:0 0 10px}.tl small{color:var(--mu)}
-.pl{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:8px;min-width:860px}
-.pl .h{font-weight:700;color:var(--mu);font-size:13px;text-align:center;margin-bottom:6px}
-.cell{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px;font-size:12px;margin-bottom:6px;min-height:46px}
-.cell.s{border:1px solid var(--ac);background:rgba(169,139,255,.18);cursor:pointer}.cell.r{color:var(--mu);text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:6px;min-width:800px}
+.cal .h{font-weight:700;color:var(--mu);font-size:13px;text-align:center}
+.day{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px;min-height:92px;font-size:12px}
+.day.td{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}.day.x{opacity:.4}
+.dn{font-weight:700;color:var(--mu);margin-bottom:4px}
+.chip{display:flex;align-items:center;gap:4px;background:rgba(169,139,255,.18);border:1px solid var(--ac);border-radius:6px;padding:3px 4px;margin-bottom:3px;cursor:pointer;font-size:11px}
+.chip .ln{min-width:0;font-size:12px;padding:1px 5px}
+.mnav{gap:14px}.mnav b{min-width:150px;text-align:center;font-size:17px}
+.kpi{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);margin-bottom:16px}
+.kpi div{padding:12px 14px;border-left:1px solid var(--line)}.kpi div:first-child{border-left:0;background:var(--side)}
+.kpi small{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--mu)}
+.kpi b{display:block;font-size:24px}.kpi span{font-size:12px;color:var(--mu)}
+.hgrid{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start}
+.jr{display:flex;gap:14px;align-items:center;border-left:3px solid var(--ac);padding:8px 0 8px 12px;margin-bottom:8px}
+.jd{min-width:96px}.jl{flex:1;min-width:0}
+.js{display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer}.js small{margin-left:auto;color:var(--mu)}
+.jt{white-space:nowrap}
+.wk{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.wk small{display:block;color:var(--mu)}
+.bar{width:90px;height:6px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%}
+.mu{color:var(--mu);font-size:12px}
 .scr{overflow-x:auto}
 .msgs{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow:auto;margin-bottom:12px}
 .m{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;max-width:80%}.m.me{align-self:flex-end;background:rgba(169,139,255,.2)}
@@ -51,7 +68,12 @@ label{display:block;font-weight:600;font-size:14px;margin-bottom:10px}label inpu
 dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;width:min(560px,92vw);padding:22px;max-height:90vh}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:9;max-width:90vw}
-@media(max-width:760px){nav{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;z-index:5;border-right:0;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}nav a{width:auto;flex:1}nav .lg{display:none}main{padding:18px 14px 100px}.grid{grid-template-columns:1fr}}
+#logo{position:fixed;top:10px;left:10px;height:50px;max-width:64px;object-fit:contain;z-index:6}
+#clock{position:fixed;top:16px;right:26px;text-align:right;line-height:1.1;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+#clock b{display:block;font-size:36px;font-weight:800}#clock span{font-size:13px;color:var(--mu)}
+@media(max-width:1000px){.kpi{grid-template-columns:repeat(3,1fr)}.kpi div:nth-child(4){border-left:0}.hgrid{grid-template-columns:1fr}}
+@media(max-width:760px){nav{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;z-index:5;border-right:0;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}nav a{width:auto;flex:1;font-size:10px}nav a b{font-size:18px}nav .lg{display:none}main{padding:44px 14px 100px}.grid{grid-template-columns:1fr}#clock{top:8px;right:12px}#logo{height:30px;top:8px;left:10px}#clock b{font-size:22px}#clock span{display:none}.kpi{grid-template-columns:repeat(2,1fr)}.kpi div{border-left:0;border-top:1px solid var(--line)}}
+@media print{:root{--bg:#fff;--card:#fff;--side:#fff;--tx:#000;--mu:#444;--line:#999}nav,#clock,#toast,.noprint{display:none!important}body::before{display:none}}
 </style>
 </head>
 <body>
@@ -59,13 +81,15 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <main id="app"></main>
 <dialog id="dlg"></dialog>
 <div id="toast" role="alert"></div>
+<div id="clock" aria-live="off"></div>
+<img id="logo" src="logo.png" alt="LogiRide" onerror="this.style.display='none'">
 <script>
 const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
 const $=s=>document.querySelector(s);
-const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>';
- const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let me=null,L=[],ST=[],SV=[],MG=[],PR={},tab='mine',fl='Toutes',adm='lines',amode='login',live=false;
-const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['messages','✉','Messages']];
+const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.2 beta &copy; LogiSync</p>';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let me=null,L=[],ST=[],SV=[],MG=[],PR={},tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0;
+const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['heures','◷','Mes heures'],['messages','✉','Messages']];
 const view=()=>(location.hash||'#journee').slice(1);
 const hm=t=>(t||'').slice(0,5);
 const tmin=t=>{const[h,m]=hm(t).split(':').map(Number);return h*60+m};
@@ -126,8 +150,7 @@ function authView(){
 function nav(v){
  const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';
- $('#nav').innerHTML='<div class="lg">LogiRide</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
- $('#nav').innerHTML='<div class="lg">V0.1b</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ $('#nav').innerHTML='<div class="lg">V0.2b</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
 }
 function row(s){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span><span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
@@ -135,10 +158,10 @@ const at=(d,t)=>new Date(d+'T'+hm(t)+':00');
 const endOf=s=>{const e=at(s.day,s.end_time);if(tmin(s.end_time)<=tmin(s.start_time))e.setDate(e.getDate()+1);return e};
 const mine=()=>SV.filter(s=>s.driver_id===me.id&&endOf(s)>new Date());
 const open=()=>SV.filter(s=>!s.driver_id&&at(s.day,s.start_time)>new Date());
- 
+
 function journee(){
  const m=mine().slice(0,3),imp=[...MG].reverse().find(x=>x.important);
- return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · <span id="clk">${new Date().toLocaleTimeString('fr-FR')}</span></p>
+ return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
  ${imp?`<div class="card" style="border-color:var(--rd)"><h2>Message important</h2>${esc(imp.body)}<p class="sub" style="margin:6px 0 0">${esc(imp.author_name)}</p></div>`:''}
  <div class="grid"><div class="card"><h2>À pourvoir</h2><p style="font-size:34px;font-weight:800;margin:0">${open().length}</p><p class="sub" style="margin:0 0 12px">services libres</p><button class="btn p" onclick="location.hash='services'">Voir les services</button></div>
  <div class="card"><h2>Mes prochains services</h2>${m.length?m.map(row).join(''):'<p class="sub">Aucun service prévu. Prends-en un dans « À pourvoir ».</p>'}</div></div>`;
@@ -149,11 +172,52 @@ function services(){
  <div class="tabs"><button data-t="mine" class="${tab==='mine'?'on':''}">Mes services (${mine().length})</button><button data-t="open" class="${tab==='open'?'on':''}">Disponibles (${open().length})</button></div>
  <div class="card">${tab==='open'?`<label>Ligne <select id="fl">${['Toutes',...L.map(x=>x.code)].map(l=>`<option ${l===fl?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}${list.length?list.map(row).join(''):'<p class="sub">Rien à afficher pour le moment.</p>'}</div>`;
 }
+
+const mstart=o=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+o);return d};
+const mlabel=d=>{const s=d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});return s[0].toUpperCase()+s.slice(1)};
+const mnav=(k,o)=>`<div class="row mnav"><button class="btn" data-${k}="-1" aria-label="Mois précédent">‹</button><b>${mlabel(mstart(o))}</b><button class="btn" data-${k}="1" aria-label="Mois suivant">›</button></div>`;
+const myM=o=>{const d=mstart(o),y=d.getFullYear(),m=d.getMonth();return SV.filter(s=>{if(s.driver_id!==me.id)return false;const t=at(s.day,s.start_time);return t.getFullYear()===y&&t.getMonth()===m}).sort((a,b)=>(a.day+a.start_time).localeCompare(b.day+b.start_time))};
 function planning(){
- const d0=new Date();d0.setDate(d0.getDate()-((d0.getDay()+6)%7));
- const days=[...Array(7)].map((_,i)=>{const d=new Date(d0);d.setDate(d0.getDate()+i);return iso(d)});
- return `<h1>Planning</h1><p class="sub">Semaine du ${fd(days[0])} au ${fd(days[6])}.</p><div class="card scr"><div class="pl">${days.map(d=>{const l=SV.filter(s=>s.day===d&&s.driver_id===me.id);return `<div><div class="h">${fd(d)}</div>${l.length?l.map(s=>`<div class="cell s" data-id="${esc(s.id)}">${lb(s.line_code)}<br>${hm(s.start_time)}–${hm(s.end_time)}</div>`).join(''):'<div class="cell r">Repos</div>'}</div>`}).join('')}</div></div>`;
+ const d=mstart(pmo),y=d.getFullYear(),m=d.getMonth(),n=new Date(y,m+1,0).getDate(),off=(d.getDay()+6)%7,c=[];
+ for(let i=0;i<off;i++)c.push('<div></div>');
+ for(let k=1;k<=n;k++){const dt=iso(new Date(y,m,k)),l=SV.filter(s=>s.day===dt&&s.driver_id===me.id);
+  c.push(`<div class="day ${dt===today()?'td':''}"><div class="dn">${k}</div>${l.map(s=>`<div class="chip" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<span>${hm(s.start_time)}–${hm(s.end_time)}</span></div>`).join('')}</div>`)}
+ return `<h1>Planning</h1><p class="sub">Tes services du mois.</p><div style="margin-bottom:14px">${mnav('mp',pmo)}</div><div class="card scr"><div class="cal">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<div class="h">${x}</div>`).join('')}${c.join('')}</div></div>`;
 }
+
+const dur=s=>(tmin(s.end_time)-tmin(s.start_time)+1440)%1440;
+const fh=m=>Math.floor(m/60)+' h '+String(m%60).padStart(2,'0');
+const fh2=m=>m%60?`${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}`:`${m/60} h`;
+function hours(){
+ const now=new Date(),mm=now.getMonth(),yy=now.getFullYear();
+ const my=SV.filter(s=>s.driver_id===me.id),done=my.filter(s=>endOf(s)<=now);
+ const sum=a=>a.reduce((t,s)=>t+dur(s),0);
+ return{mois:sum(done.filter(s=>{const d=at(s.day,s.start_time);return d.getMonth()===mm&&d.getFullYear()===yy})),total:sum(done),venir:sum(my.filter(s=>endOf(s)>now))};
+}
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return new Date(y,mo-1,da)}
+const isFerie=ds=>{const y=+ds.slice(0,4);if(['01-01','05-01','05-08','07-14','08-15','11-01','11-11','12-25'].includes(ds.slice(5)))return true;const e=easter(y);return[1,39,50].some(n=>iso(new Date(y,e.getMonth(),e.getDate()+n))===ds)};
+const isDim=ds=>{const[y,m,d]=ds.split('-').map(Number);return new Date(y,m-1,d).getDay()===0};
+const nuit=s=>{const a=tmin(s.start_time),b=a+dur(s),ov=(x,y)=>Math.max(0,Math.min(b,y)-Math.max(a,x));return ov(-180,360)+ov(1260,1800)};
+function heures(){
+ const d=mstart(hmo),y=d.getFullYear(),m=d.getMonth(),now=new Date(),inM=myM(hmo),my=SV.filter(s=>s.driver_id===me.id);
+ const sum=a=>a.reduce((t,s)=>t+dur(s),0),tot=sum(inM),done=sum(inM.filter(s=>endOf(s)<=now));
+ const form=sum(inM.filter(s=>/formation/i.test(s.detail||''))),nt=inM.reduce((t,s)=>t+nuit(s),0);
+ const fs=inM.filter(s=>isDim(s.day)||isFerie(s.day)),fj=new Set(fs.map(s=>s.day)).size;
+ const days=[...new Set(inM.map(s=>s.day))];
+ const f0=new Date(y,m,1);f0.setDate(1-((f0.getDay()+6)%7));
+ const wk=[];for(let w=new Date(f0);w<=new Date(y,m+1,0);w.setDate(w.getDate()+7)){const a=iso(w),e=new Date(w);e.setDate(e.getDate()+6);const b=iso(e);wk.push({a,b,h:sum(my.filter(s=>s.day>=a&&s.day<=b))})}
+ return `<h1>Mes heures</h1><p class="sub">Tes heures de service, jour par jour et semaine par semaine.</p>
+ <div class="row noprint" style="justify-content:space-between;margin-bottom:12px">${mnav('mh',hmo)}<div class="row"><button class="btn" id="csv">⭳ CSV</button><button class="btn" id="prt">⎙ Imprimer / PDF</button></div></div>
+ <p class="sub" style="font-size:13px">Chaque service compte de la prise de service à la fin de service ; les formations comptent aussi, formateur compris. Nuit : part entre 21 h et 6 h.</p>
+ <div class="kpi"><div><small>Total du mois</small><b>${fh2(tot)}</b><span>${fh2(done)} effectuées · ${fh2(tot-done)} à venir</span></div><div><small>Services</small><b>${inM.length}</b><span>${fh2(tot)}</span></div><div><small>Formations</small><b>${fh2(form)}</b><span>formateur compris</span></div><div><small>Nuit</small><b>${fh2(nt)}</b><span>de 21 h à 6 h</span></div><div><small>Dimanches et fériés</small><b>${fh2(sum(fs))}</b><span>${fj} jour${fj>1?'s':''} travaillé${fj>1?'s':''}</span></div><div><small>Congés</small><b>0</b><span>jour</span></div></div>
+ <div class="hgrid"><div class="card"><h2>Jour par jour</h2>${days.length?days.map(dd=>{const l=inM.filter(s=>s.day===dd);return `<div class="jr"><b class="jd">${fd(dd)}</b><div class="jl">${l.map(s=>`<div class="js" tabindex="0" data-id="${esc(s.id)}"><span>🚌</span><span>Service <b>${esc(s.id)}</b> · ligne ${esc(s.line_code)} · ${hm(s.start_time)}–${hm(s.end_time)}</span><small>${fh2(dur(s))}</small></div>`).join('')}</div><b class="jt">${fh2(sum(l))}</b></div>`}).join(''):'<p class="sub">Aucun service ce mois-ci.</p>'}</div>
+ <div class="card"><div class="row" style="justify-content:space-between"><h2>Semaines</h2><span class="mu">règle : 48 h au plus</span></div>${wk.map(w=>`<div class="wk"><div><b>Semaine du ${fd(w.a)}</b><small>au ${fd(w.b)}</small></div><div class="row" style="flex-wrap:nowrap;gap:10px"><div class="bar"><i style="width:${Math.min(100,w.h/28.8)}%;background:${w.h>2880?'var(--rd)':'var(--ok)'}"></i></div><b>${fh2(w.h)}</b></div></div>`).join('')}</div></div>`;
+}
+function csv(){
+ const r=myM(hmo),d=mstart(hmo),t='Date;Service;Ligne;Début;Fin;Durée (h)\n'+r.map(s=>[s.day,s.id,s.line_code,hm(s.start_time),hm(s.end_time),(dur(s)/60).toFixed(2).replace('.',',')].join(';')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download=`heures-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}.csv`;a.click();
+}
+
 const msgHtml=()=>MG.map(m=>`<div class="m ${m.author_id===me.id?'me':''} ${m.important?'imp':''}"><small>${esc(m.author_name)} · ${new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${m.important?' · important':''}</small><br>${esc(m.body)}</div>`).join('')||'<p class="sub">Aucun message.</p>';
 function paintMsgs(){const e=$('#ms');if(e){e.innerHTML=msgHtml();e.scrollTop=e.scrollHeight}}
 function messages(){
@@ -216,16 +280,8 @@ function svcDlg(id){
  const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
 }
 
- const dur=s=>(tmin(s.end_time)-tmin(s.start_time)+1440)%1440;
-const fh=m=>Math.floor(m/60)+' h '+String(m%60).padStart(2,'0');
-function hours(){
- const now=new Date(),mm=now.getMonth(),yy=now.getFullYear();
- const my=SV.filter(s=>s.driver_id===me.id),done=my.filter(s=>endOf(s)<=now);
- const sum=a=>a.reduce((t,s)=>t+dur(s),0);
- return{mois:sum(done.filter(s=>{const d=at(s.day,s.start_time);return d.getMonth()===mm&&d.getFullYear()===yy})),total:sum(done),venir:sum(my.filter(s=>endOf(s)>now))};
-}
 function profil(){
- const h=hours() ;
+ const h=hours();
  return `<h1>Mon compte LogiRide</h1><p class="sub">Ces informations sont visibles de l’équipe et de l'administration LogiRide.</p><div class="stats" style="max-width:480px"><div><small>Ce mois-ci</small><b>${fh(h.mois)}</b></div><div><small>Total effectué</small><b>${fh(h.total)}</b></div><div><small>À venir</small><b>${fh(h.venir)}</b></div></div><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%" ${me.role==='admin'?'':'readonly'}></label>${me.role==='admin'?'':'<p class="sub" style="margin:-4px 0 12px;font-size:13px">Le matricule ne peut être modifié que par un administrateur.</p>'}<p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
 }
 function render(){
@@ -233,11 +289,14 @@ function render(){
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
  const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
- nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin,profil})[v]();
-$('#app').insertAdjacentHTML('beforeend',FOOT);
- document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
+ nav(v);$('#app').innerHTML=({journee,services,planning,heures,messages,admin,profil})[v]();
+ $('#app').insertAdjacentHTML('beforeend',FOOT);
+ document.querySelectorAll('.sv[data-id],.chip[data-id],.js[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
+ document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{pmo+=+b.dataset.mp;render()});
+ document.querySelectorAll('[data-mh]').forEach(b=>b.onclick=()=>{hmo+=+b.dataset.mh;render()});
+ const cb=$('#csv');if(cb)cb.onclick=csv;const pb=$('#prt');if(pb)pb.onclick=()=>window.print();
  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
  const f=$('#fl');if(f)f.onchange=()=>{fl=f.value;render()};
  const pf=$('#pf');if(pf)pf.onsubmit=async e=>{e.preventDefault();const o={prenom:$('#p1').value.trim(),nom:$('#p2').value.trim()};if(me.role==='admin')o.matricule=$('#p3').value.trim().toUpperCase();if(!o.prenom||!o.nom||(me.role==='admin'&&!o.matricule)){$('#pm').textContent='Renseigne ton prénom, ton nom et ton matricule.';return}const{error}=await sb.from('profiles').update(o).eq('id',me.id);if(error){$('#pm').textContent=error.message;return}Object.assign(me,o);await load();render();toast('Profil enregistré.',1)};
@@ -246,7 +305,13 @@ $('#app').insertAdjacentHTML('beforeend',FOOT);
   if(error)toast(error.message);else i.value=''}}
 }
 
- setInterval(()=>{const c=$('#clk');if(c)c.textContent=new Date().toLocaleTimeString('fr-FR')},1000);
+let tk=0;
+function tick(){
+ const n=new Date(),t=n.toLocaleTimeString('fr-FR'),c=$('#clock');
+ if(c)c.innerHTML='<b>'+t.slice(0,5)+'<i style="font-size:17px;font-weight:600;color:var(--mu);font-style:normal">'+t.slice(5)+'</i></b><span>'+n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</span>';
+ if(++tk%60===0&&me&&['journee','services','planning','heures','profil'].includes(view())&&!$('#dlg').open&&!document.activeElement.matches('input,select,textarea'))render();
+}
+tick();setInterval(tick,1000);
 window.addEventListener('hashchange',render);
 sb.auth.getSession().then(({data})=>data.session?enter(data.session.user.id):render());
 </script>
