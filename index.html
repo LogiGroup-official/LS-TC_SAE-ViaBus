@@ -98,7 +98,7 @@ function subscribe(){
 
 function authView(){
  const su=amode==='signup';$('#nav').style.display='none';
- $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion à LogiRide'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur LogiRide.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. LSTCXXX"></label>':''}<label>E-mail<input id="fe" type="email" placeholder="ex. xyz@exemple.com" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
+ $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion à LogiRide'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur LogiRide.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. LSTCXXX (il sera vérifié)"></label>':''}<label>E-mail<input id="fe" type="email" placeholder="ex. xyz@exemple.com (il servira en cas de problème)" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
  $('#sw').onclick=()=>{amode=su?'login':'signup';authView()};
  $('#af').onsubmit=async e=>{
   e.preventDefault();const er=m=>$('#er').textContent=m,email=$('#fe').value.trim(),pw=$('#fw').value;
@@ -133,15 +133,15 @@ const open=()=>SV.filter(s=>!s.driver_id&&s.day>=today());
 
 function journee(){
  const m=mine().slice(0,3),imp=[...MG].reverse().find(x=>x.important);
- return `<h1>Bonjour ${esc(me.prenom)}</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+ return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
  ${imp?`<div class="card" style="border-color:var(--rd)"><h2>Message important</h2>${esc(imp.body)}<p class="sub" style="margin:6px 0 0">${esc(imp.author_name)}</p></div>`:''}
  <div class="grid"><div class="card"><h2>À pourvoir</h2><p style="font-size:34px;font-weight:800;margin:0">${open().length}</p><p class="sub" style="margin:0 0 12px">services libres</p><button class="btn p" onclick="location.hash='services'">Voir les services</button></div>
  <div class="card"><h2>Mes prochains services</h2>${m.length?m.map(row).join(''):'<p class="sub">Aucun service prévu. Prends-en un dans « À pourvoir ».</p>'}</div></div>`;
 }
 function services(){
  const list=tab==='mine'?mine():open().filter(s=>fl==='Toutes'||s.line_code===fl);
- return `<h1>Services</h1><p class="sub">Tes services et ceux à pourvoir.</p>
- <div class="tabs"><button data-t="mine" class="${tab==='mine'?'on':''}">Mes services (${mine().length})</button><button data-t="open" class="${tab==='open'?'on':''}">À pourvoir (${open().length})</button></div>
+ return `<h1>Services Trans'Cab</h1><p class="sub">Vos services et ceux à pourvoir.</p>
+ <div class="tabs"><button data-t="mine" class="${tab==='mine'?'on':''}">Mes services (${mine().length})</button><button data-t="open" class="${tab==='open'?'on':''}">Disponibles (${open().length})</button></div>
  <div class="card">${tab==='open'?`<label>Ligne <select id="fl">${['Toutes',...L.map(x=>x.code)].map(l=>`<option ${l===fl?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`:''}${list.length?list.map(row).join(''):'<p class="sub">Rien à afficher pour le moment.</p>'}</div>`;
 }
 function planning(){
@@ -152,7 +152,7 @@ function planning(){
 const msgHtml=()=>MG.map(m=>`<div class="m ${m.author_id===me.id?'me':''} ${m.important?'imp':''}"><small>${esc(m.author_name)} · ${new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${m.important?' · important':''}</small><br>${esc(m.body)}</div>`).join('')||'<p class="sub">Aucun message.</p>';
 function paintMsgs(){const e=$('#ms');if(e){e.innerHTML=msgHtml();e.scrollTop=e.scrollHeight}}
 function messages(){
- return `<h1>Messages</h1><p class="sub">Régulation et équipe du dépôt.</p><div class="card"><div class="msgs" id="ms">${msgHtml()}</div><form id="mf" class="row" style="flex-wrap:nowrap"><input id="mi" style="flex:1" placeholder="Écrire un message" aria-label="Message">${me.role==='admin'?'<label style="margin:0;white-space:nowrap"><input type="checkbox" id="mx"> Important</label>':''}<button class="btn p">Envoyer</button></form></div>`;
+ return `<h1>Messagerie interne LogiRide</h1><p class="sub">Régulation et équipe du dépôt Trans'Cab.</p><div class="card"><div class="msgs" id="ms">${msgHtml()}</div><form id="mf" class="row" style="flex-wrap:nowrap"><input id="mi" style="flex:1" placeholder="Écrire un message" aria-label="Message">${me.role==='admin'?'<label style="margin:0;white-space:nowrap"><input type="checkbox" id="mx"> Important</label>':''}<button class="btn p">Envoyer</button></form></div>`;
 }
 
 function detail(id){
