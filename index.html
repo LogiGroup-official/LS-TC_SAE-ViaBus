@@ -120,14 +120,14 @@ const twice=(b,fn)=>{b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent
 async function act(p){const{error}=await p;if(error){toast(error.code==='23503'?'Impossible : des services utilisent encore cette ligne.':error.message);return false}await load();render();return true}
 
 async function load(){
- const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),sb.from('services').select('*').order('day').order('start_time'),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role')]);
+ const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),sb.from('services').select('*').order('day').order('start_time'),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role,approved')]);
  const e=r.find(x=>x.error);if(e)toast(e.error.message);
  L=r[0].data||[];ST=r[1].data||[];SV=r[2].data||[];MG=r[3].data||[];PR=Object.fromEntries((r[4].data||[]).map(p=>[p.id,p]));
 }
 async function enter(id){
  let{data}=await sb.from('profiles').select('*').eq('id',id).maybeSingle();
  if(!data){await new Promise(r=>setTimeout(r,800));data=(await sb.from('profiles').select('*').eq('id',id).maybeSingle()).data}
- me=data||{id,prenom:'',nom:'',role:'driver'};await load();subscribe();render();
+ me=data||{id,prenom:'',nom:'',role:'driver'};if(!me.approved){render();return}await load();subscribe();render();
 }
 function subscribe(){
  if(live)return;live=true;
@@ -152,7 +152,7 @@ function authView(){
    if(pw!==$('#fc').value)return er('Les deux mots de passe sont différents.');
    const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{prenom:p,nom:n,matricule:m}}});
    if(error)return er(error.message);
-   if(!data.session){amode='login';authView();$('#er').textContent='Compte créé. Confirme ton e-mail, puis connecte-toi.';return}
+   if(!data.session){amode='login';authView();$('#er').textContent='Compte créé. Confirme ton e-mail, puis connecte-toi : ton compte devra ensuite être validé par un administrateur.';return}
    await enter(data.user.id);
   }else{
    const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
@@ -254,12 +254,13 @@ function detail(id){
 }
 
 function admin(){
- let b;
+ let b;const npend=Object.values(PR).filter(p=>!p.approved).length;
  if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
  else if(adm==='services')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length} services</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+SV.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('');
- else b=Object.values(PR).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button>`}</div>`).join('');
+ else if(adm==='pending'){const w=Object.values(PR).filter(p=>!p.approved);b=w.length?w.map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>Matricule : ${esc(p.matricule)}</small></div><button class="btn p" data-ok="${p.id}">Valider</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Refuser</button></div>`).join(''):'<p class="sub">Aucun compte en attente.</p>'}
+ else b=Object.values(PR).filter(p=>p.approved).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Supprimer</button>`}</div>`).join('');
  const T=(k,t)=>`<button data-a="${k}" class="${adm===k?'on':''}">${t}</button>`;
- return `<h1>Administration</h1><p class="sub">Lignes, terminus, arrêts, services et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('users','Conducteurs')}</div><div class="card">${b}</div>`;
+ return `<h1>Administration</h1><p class="sub">Lignes, services et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('pending','En attente ('+npend+')')}${T('users','Conducteurs existants')}</div><div class="card">${b}</div>`;
 }
 function lineDlg(code){
  const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:''};
@@ -282,7 +283,7 @@ function lineDlg(code){
 }
 function svcDlg(id){
  const s=id?SV.find(x=>x.id===id):{id:'',line_code:L[0]?L[0].code:'',day:today(),start_time:'08:00',end_time:'12:00',detail:'Dépôt · 1 tour',driver_id:null};
- dlg(`<h2>${id?'Modifier':'Ajouter'} un service</h2><form id="sf"><div class="row"><label>Numéro<br><input id="s1" value="${esc(s.id)}" ${id?'readonly':''}></label><label>Ligne<br><select id="s2">${L.map(x=>`<option ${x.code===s.line_code?'selected':''}>${esc(x.code)}</option>`).join('')}</select></label><label>Jour<br><input id="s3" type="date" value="${esc(s.day)}"></label></div><div class="row"><label>Début<br><input id="s4" type="time" value="${hm(s.start_time)}"></label><label>Fin<br><input id="s5" type="time" value="${hm(s.end_time)}"></label></div><label>Détail<input id="s6" value="${esc(s.detail)}" style="width:100%"></label><label>Conducteur<br><select id="s7"><option value="">À pourvoir</option>${Object.values(PR).map(p=>`<option value="${p.id}" ${p.id===s.driver_id?'selected':''}>${esc(p.prenom+' '+p.nom)}</option>`).join('')}</select></label><p class="err" id="se" role="alert"></p><div class="row" style="justify-content:flex-end">${id?'<button type="button" class="btn" id="sd" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ dlg(`<h2>${id?'Modifier':'Ajouter'} un service</h2><form id="sf"><div class="row"><label>Numéro<br><input id="s1" value="${esc(s.id)}" ${id?'readonly':''}></label><label>Ligne<br><select id="s2">${L.map(x=>`<option ${x.code===s.line_code?'selected':''}>${esc(x.code)}</option>`).join('')}</select></label><label>Jour<br><input id="s3" type="date" value="${esc(s.day)}"></label></div><div class="row"><label>Début<br><input id="s4" type="time" value="${hm(s.start_time)}"></label><label>Fin<br><input id="s5" type="time" value="${hm(s.end_time)}"></label></div><label>Détail<input id="s6" value="${esc(s.detail)}" style="width:100%"></label><label>Conducteur<br><select id="s7"><option value="">À pourvoir</option>${Object.values(PR).filter(p=>p.approved).map(p=>`<option value="${p.id}" ${p.id===s.driver_id?'selected':''}>${esc(p.prenom+' '+p.nom)}</option>`).join('')}</select></label><p class="err" id="se" role="alert"></p><div class="row" style="justify-content:flex-end">${id?'<button type="button" class="btn" id="sd" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
  const er=m=>$('#se').textContent=m;
  $('#sf').onsubmit=async e=>{e.preventDefault();
   const n=$('#s1').value.replace(/[^A-Za-z0-9-]/g,'');
@@ -309,12 +310,20 @@ function sheet(id){
  return true;
 }
 function printSheet(id){if($('#dlg').open)close();if(!sheet(id))return;document.body.classList.add('ps');setTimeout(()=>window.print(),60)}
+function pendingView(){
+ document.body.classList.remove('in');$('#nav').style.display='none';
+ $('#app').innerHTML=`<div class="au card"><h1>Compte en attente</h1><p class="sub">Bonjour ${esc(me.prenom)}, ton compte doit être validé par un administrateur avant que tu puisses accéder à LogiRide. Cette page se met à jour toute seule dès que c’est fait.</p><div class="row"><button class="btn p" id="chk">Vérifier maintenant</button><button class="btn" id="out">Se déconnecter</button></div></div>`;
+ $('#app').insertAdjacentHTML('beforeend',FOOT);
+ $('#chk').onclick=()=>enter(me.id);
+ $('#out').onclick=()=>{me=null;sb.auth.signOut().then(render)};
+}
 function profil(){
  const h=hours();
  return `<h1>Mon compte LogiRide</h1><p class="sub">Ces informations sont visibles de l’équipe et de l'administration LogiRide.</p><div class="stats" style="max-width:480px"><div><small>Ce mois-ci</small><b>${fh(h.mois)}</b></div><div><small>Total effectué</small><b>${fh(h.total)}</b></div><div><small>À venir</small><b>${fh(h.venir)}</b></div></div><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%" ${me.role==='admin'?'':'readonly'}></label>${me.role==='admin'?'':'<p class="sub" style="margin:-4px 0 12px;font-size:13px">Le matricule ne peut être modifié que par un administrateur.</p>'}<p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
 }
 function render(){
  if(!me){authView();return}
+ if(!me.approved){pendingView();return}
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
  const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
@@ -328,6 +337,8 @@ function render(){
  document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=e=>{e.stopPropagation();printSheet(b.dataset.pr)});
  const cb=$('#csv');if(cb)cb.onclick=csv;const pb=$('#prt');if(pb)pb.onclick=()=>window.print();
  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
+ document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({approved:true}).eq('id',b.dataset.ok)));
+ document.querySelectorAll('[data-del]').forEach(b=>twice(b,()=>act(sb.rpc('admin_delete_user',{uid:b.dataset.del}))));
  const f=$('#fl');if(f)f.onchange=()=>{fl=f.value;render()};
  const pf=$('#pf');if(pf)pf.onsubmit=async e=>{e.preventDefault();const o={prenom:$('#p1').value.trim(),nom:$('#p2').value.trim()};if(me.role==='admin')o.matricule=$('#p3').value.trim().toUpperCase();if(!o.prenom||!o.nom||(me.role==='admin'&&!o.matricule)){$('#pm').textContent='Renseigne ton prénom, ton nom et ton matricule.';return}const{error}=await sb.from('profiles').update(o).eq('id',me.id);if(error){$('#pm').textContent=error.message;return}Object.assign(me,o);await load();render();toast('Profil enregistré.',1)};
  const mf=$('#mf');if(mf){paintMsgs();mf.onsubmit=async e=>{e.preventDefault();const i=$('#mi'),t=i.value.trim();if(!t)return;
@@ -339,7 +350,8 @@ let tk=0;
 function tick(){
  const n=new Date(),t=n.toLocaleTimeString('fr-FR'),c=$('#clock');
  if(c)c.innerHTML='<b>'+t.slice(0,5)+'<i style="font-size:17px;font-weight:600;color:var(--mu);font-style:normal">'+t.slice(5)+'</i></b><span>'+n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</span>';
- if(++tk%60===0&&me&&['journee','services','planning','heures','profil'].includes(view())&&!$('#dlg').open&&!document.activeElement.matches('input,select,textarea'))render();
+ tk++;if(me&&!me.approved&&tk%30===0)enter(me.id);
+ if(tk%60===0&&me&&['journee','services','planning','heures','profil'].includes(view())&&!$('#dlg').open&&!document.activeElement.matches('input,select,textarea'))render();
 }
 tick();setInterval(tick,1000);
 window.addEventListener('afterprint',()=>document.body.classList.remove('ps'));
