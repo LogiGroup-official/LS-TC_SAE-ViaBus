@@ -212,7 +212,7 @@ function svcDlg(id){
 }
 
 function profil(){
- return `<h1>Mon profil</h1><p class="sub">Ces informations sont visibles de l’équipe.</p><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%"></label><p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
+ return `<h1>Mon compte LogiRide</h1><p class="sub">Ces informations sont visibles de l’équipe et de l'administration LogiRide.</p><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%" ${me.role==='admin'?'':'readonly'}></label>${me.role==='admin'?'':'<p class="sub" style="margin:-4px 0 12px;font-size:13px">Le matricule ne peut être modifié que par un administrateur.</p>'}<p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
 }
 function render(){
  if(!me){authView();return}
@@ -225,7 +225,7 @@ function render(){
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
  const f=$('#fl');if(f)f.onchange=()=>{fl=f.value;render()};
- const pf=$('#pf');if(pf)pf.onsubmit=async e=>{e.preventDefault();const o={prenom:$('#p1').value.trim(),nom:$('#p2').value.trim(),matricule:$('#p3').value.trim().toUpperCase()};if(!o.prenom||!o.nom||!o.matricule){$('#pm').textContent='Renseigne ton prénom, ton nom et ton matricule.';return}const{error}=await sb.from('profiles').update(o).eq('id',me.id);if(error){$('#pm').textContent=error.message;return}Object.assign(me,o);await load();render();toast('Profil enregistré.',1)};
+ const pf=$('#pf');if(pf)pf.onsubmit=async e=>{e.preventDefault();const o={prenom:$('#p1').value.trim(),nom:$('#p2').value.trim()};if(me.role==='admin')o.matricule=$('#p3').value.trim().toUpperCase();if(!o.prenom||!o.nom||(me.role==='admin'&&!o.matricule)){$('#pm').textContent='Renseigne ton prénom, ton nom et ton matricule.';return}const{error}=await sb.from('profiles').update(o).eq('id',me.id);if(error){$('#pm').textContent=error.message;return}Object.assign(me,o);await load();render();toast('Profil enregistré.',1)};
  const mf=$('#mf');if(mf){paintMsgs();mf.onsubmit=async e=>{e.preventDefault();const i=$('#mi'),t=i.value.trim();if(!t)return;
   const{error}=await sb.from('messages').insert({author_id:me.id,author_name:(me.prenom+' '+me.nom).trim(),body:t,important:!!($('#mx')&&$('#mx').checked)});
   if(error)toast(error.message);else i.value=''}}
