@@ -133,7 +133,7 @@ const open=()=>SV.filter(s=>!s.driver_id&&s.day>=today());
 
 function journee(){
  const m=mine().slice(0,3),imp=[...MG].reverse().find(x=>x.important);
- return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+ return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · <span id="clk">${new Date().toLocaleTimeString('fr-FR')}</span></p>
  ${imp?`<div class="card" style="border-color:var(--rd)"><h2>Message important</h2>${esc(imp.body)}<p class="sub" style="margin:6px 0 0">${esc(imp.author_name)}</p></div>`:''}
  <div class="grid"><div class="card"><h2>À pourvoir</h2><p style="font-size:34px;font-weight:800;margin:0">${open().length}</p><p class="sub" style="margin:0 0 12px">services libres</p><button class="btn p" onclick="location.hash='services'">Voir les services</button></div>
  <div class="card"><h2>Mes prochains services</h2>${m.length?m.map(row).join(''):'<p class="sub">Aucun service prévu. Prends-en un dans « À pourvoir ».</p>'}</div></div>`;
@@ -219,7 +219,7 @@ function render(){
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
  const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
- nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin,profil})[v]();
+ nav(v);$('#app').innerHTML=$('#app').insertAdjacentHTML('beforeend','<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>');({journee,services,planning,messages,admin,profil})[v]();
  document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
@@ -230,6 +230,8 @@ function render(){
   const{error}=await sb.from('messages').insert({author_id:me.id,author_name:(me.prenom+' '+me.nom).trim(),body:t,important:!!($('#mx')&&$('#mx').checked)});
   if(error)toast(error.message);else i.value=''}}
 }
+
+ setInterval(()=>{const c=$('#clk');if(c)c.textContent=new Date().toLocaleTimeString('fr-FR')},1000);
 window.addEventListener('hashchange',render);
 sb.auth.getSession().then(({data})=>data.session?enter(data.session.user.id):render());
 </script>
