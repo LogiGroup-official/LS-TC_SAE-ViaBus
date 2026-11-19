@@ -9,7 +9,8 @@
 :root{--bg:#2e1a47;--side:#24143a;--card:#38235a;--line:#523a7c;--tx:#f4eefc;--mu:#bba9d8;--ac:#a98bff;--acx:#1d0f33;--rd:#ff7a88;--ok:#4ade80;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh;padding-top:env(safe-area-inset-top,0px)}
-nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(46,26,71,.78),rgba(46,26,71,.88)),url('fond.jpg') center/cover no-repeat}
+ nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
 nav a{width:68px;padding:9px 0;border-radius:12px;text-align:center;color:var(--mu);font-size:12px;cursor:pointer}
 nav a b{display:block;font-size:20px;font-weight:400}nav a.on{background:var(--ac);color:var(--acx)}
 nav .lg{font-weight:800;color:var(--ac);margin-bottom:10px}
@@ -61,7 +62,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
 const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>';
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let me=null,L=[],ST=[],SV=[],MG=[],PR={},tab='mine',fl='Toutes',adm='lines',amode='login',live=false;
 const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['messages','✉','Messages']];
 const view=()=>(location.hash||'#journee').slice(1);
@@ -99,6 +101,7 @@ function subscribe(){
 function authView(){
  const su=amode==='signup';$('#nav').style.display='none';
  $('#app').innerHTML=`<div class="au card"><h1>${su?'Créer un compte':'Connexion à LogiRide'}</h1><p class="sub">${su?'Rejoins ton centre bus.':'Connecte-toi à ton espace conducteur LogiRide.'}</p><form id="af" novalidate>${su?'<div class="two"><label>Prénom<input id="fp" autocomplete="given-name"></label><label>Nom<input id="fn" autocomplete="family-name"></label></div><label>Matricule<input id="fm" placeholder="ex. LSTCXXX (il sera vérifié)"></label>':''}<label>E-mail<input id="fe" type="email" placeholder="ex. xyz@exemple.com (il servira en cas de problème)" autocomplete="username"></label><label>Mot de passe<input id="fw" type="password" autocomplete="${su?'new-password':'current-password'}"></label>${su?'<label>Confirmer le mot de passe<input id="fc" type="password" autocomplete="new-password"></label>':''}<p class="err" id="er" role="alert"></p><button class="btn p" style="width:100%">${su?'Créer mon compte':'Se connecter'}</button></form><p class="sub" style="margin:16px 0 0;text-align:center">${su?'Déjà un compte ?':'Pas encore de compte ?'} <button class="sw" id="sw">${su?'Se connecter':'Créer un compte'}</button></p></div>`;
+ $('#app').insertAdjacentHTML('beforeend',FOOT);
  $('#sw').onclick=()=>{amode=su?'login':'signup';authView()};
  $('#af').onsubmit=async e=>{
   e.preventDefault();const er=m=>$('#er').textContent=m,email=$('#fe').value.trim(),pw=$('#fw').value;
@@ -128,9 +131,11 @@ function nav(v){
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
 }
 function row(s){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span><span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
-const mine=()=>SV.filter(s=>s.driver_id===me.id&&s.day>=today());
-const open=()=>SV.filter(s=>!s.driver_id&&s.day>=today());
-
+const at=(d,t)=>new Date(d+'T'+hm(t)+':00');
+const endOf=s=>{const e=at(s.day,s.end_time);if(tmin(s.end_time)<=tmin(s.start_time))e.setDate(e.getDate()+1);return e};
+const mine=()=>SV.filter(s=>s.driver_id===me.id&&endOf(s)>new Date());
+const open=()=>SV.filter(s=>!s.driver_id&&at(s.day,s.start_time)>new Date());
+ 
 function journee(){
  const m=mine().slice(0,3),imp=[...MG].reverse().find(x=>x.important);
  return `<h1>Bonjour ${esc(me.prenom)}, bienvenue sur votre espace LogiRide !</h1><p class="sub">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · <span id="clk">${new Date().toLocaleTimeString('fr-FR')}</span></p>
@@ -211,8 +216,17 @@ function svcDlg(id){
  const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
 }
 
+ const dur=s=>(tmin(s.end_time)-tmin(s.start_time)+1440)%1440;
+const fh=m=>Math.floor(m/60)+' h '+String(m%60).padStart(2,'0');
+function hours(){
+ const now=new Date(),mm=now.getMonth(),yy=now.getFullYear();
+ const my=SV.filter(s=>s.driver_id===me.id),done=my.filter(s=>endOf(s)<=now);
+ const sum=a=>a.reduce((t,s)=>t+dur(s),0);
+ return{mois:sum(done.filter(s=>{const d=at(s.day,s.start_time);return d.getMonth()===mm&&d.getFullYear()===yy})),total:sum(done),venir:sum(my.filter(s=>endOf(s)>now))};
+}
 function profil(){
- return `<h1>Mon compte LogiRide</h1><p class="sub">Ces informations sont visibles de l’équipe et de l'administration LogiRide.</p><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%" ${me.role==='admin'?'':'readonly'}></label>${me.role==='admin'?'':'<p class="sub" style="margin:-4px 0 12px;font-size:13px">Le matricule ne peut être modifié que par un administrateur.</p>'}<p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
+ const h=hours() ;
+ return `<h1>Mon compte LogiRide</h1><p class="sub">Ces informations sont visibles de l’équipe et de l'administration LogiRide.</p><div class="stats" style="max-width:480px"><div><small>Ce mois-ci</small><b>${fh(h.mois)}</b></div><div><small>Total effectué</small><b>${fh(h.total)}</b></div><div><small>À venir</small><b>${fh(h.venir)}</b></div></div><div class="card" style="max-width:480px"><form id="pf"><div class="two"><label>Prénom<input id="p1" value="${esc(me.prenom)}" style="width:100%"></label><label>Nom<input id="p2" value="${esc(me.nom)}" style="width:100%"></label></div><label>Matricule<input id="p3" value="${esc(me.matricule)}" style="width:100%" ${me.role==='admin'?'':'readonly'}></label>${me.role==='admin'?'':'<p class="sub" style="margin:-4px 0 12px;font-size:13px">Le matricule ne peut être modifié que par un administrateur.</p>'}<p class="sub" style="margin:0 0 12px">Rôle : ${me.role==='admin'?'administrateur':'conducteur'}</p><p class="err" id="pm" role="alert"></p><button class="btn p">Enregistrer</button></form></div>`;
 }
 function render(){
  if(!me){authView();return}
@@ -220,7 +234,7 @@ function render(){
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
  const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
  nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin,profil})[v]();
-$('#app').insertAdjacentHTML('beforeend','<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>');
+$('#app').insertAdjacentHTML('beforeend',FOOT);
  document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
