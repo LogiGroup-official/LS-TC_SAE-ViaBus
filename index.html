@@ -219,7 +219,8 @@ function render(){
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
  const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
- nav(v);$('#app').innerHTML=$('#app').insertAdjacentHTML('beforeend','<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>');({journee,services,planning,messages,admin,profil})[v]();
+ nav(v);$('#app').innerHTML=({journee,services,planning,messages,admin,profil})[v]();
+$('#app').insertAdjacentHTML('beforeend','<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.1 beta &copy; LogiSync</p>');
  document.querySelectorAll('.sv[data-id],.cell[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
