@@ -448,53 +448,141 @@ function admin(){
  let b;const npend=Object.values(PR).filter(p=>!p.approved).length;
  if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires · course ${trj(x)[0]} min · repos ${trj(x)[1]} min</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
  else if(adm==='services'){const size=100,pageCount=Math.max(1,Math.ceil(SV.length/size));svcPage=Math.min(svcPage,pageCount-1);const shown=SV.slice(svcPage*size,(svcPage+1)*size);b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length.toLocaleString('fr-FR')} services · page ${svcPage+1}/${pageCount}</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+shown.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'} · ${esc(vehText(s)||'Véhicule non affecté')}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('')+`<div class="row" style="justify-content:center;margin-top:14px"><button class="btn" data-sp="-1" ${svcPage===0?'disabled':''}>Précédent</button><span class="mu">${(svcPage*size+1).toLocaleString('fr-FR')}–${Math.min((svcPage+1)*size,SV.length).toLocaleString('fr-FR')} sur ${SV.length.toLocaleString('fr-FR')}</span><button class="btn" data-sp="1" ${svcPage>=pageCount-1?'disabled':''}>Suivant</button></div>`;}
- else if(adm==='fleet')b=`<div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b>${VEH.length} véhicules au parc</b><p class="sub" style="margin:2px 0 0">Affectations calculées selon les lignes, les horaires et les disponibilités simultanées.</p></div><button class="btn p" id="autoFleet">Affecter automatiquement</button></div>`+VEH.map(v=>`<div class="sv" style="cursor:default"><span class="ln">${esc(v.fleet_number)}</span><div class="i"><b>${esc(v.model)}</b><small>${esc(v.operator)} · ${esc(v.category)}${v.length_m?' · '+esc(v.length_m)+' m':''}${v.doors?' · '+esc(v.doors)+' portes':''}${v.active?'':' · Non disponible'}</small></div></div>`).join('');
+ else if(adm==='fleet')b=`<div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b>${VEH.length} véhicules au parc</b><p class="sub" style="margin:2px 0 0">Affectations selon les lignes, les catégories autorisées et la réservation du véhicule par conducteur pendant toute sa vacation.</p></div><button class="btn p" id="autoFleet">Affecter automatiquement</button></div>`+VEH.map(v=>`<div class="sv" style="cursor:default"><span class="ln">${esc(v.fleet_number)}</span><div class="i"><b>${esc(v.model)}</b><small>${esc(v.operator)} · ${esc(v.category)}${v.length_m?' · '+esc(v.length_m)+' m':''}${v.doors?' · '+esc(v.doors)+' portes':''}${v.active?'':' · Non disponible'}</small></div></div>`).join('');
  else if(adm==='pending'){const w=Object.values(PR).filter(p=>!p.approved);b=w.length?w.map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>Matricule : ${esc(p.matricule)}</small></div><button class="btn p" data-ok="${p.id}">Valider</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Refuser</button></div>`).join(''):'<p class="sub">Aucun compte en attente.</p>'}
  else b=Object.values(PR).filter(p=>p.approved).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Supprimer</button>`}</div>`).join('');
  const T=(k,t)=>`<button data-a="${k}" class="${adm===k?'on':''}">${t}</button>`;
  return `<h1>Administration</h1><p class="sub">Lignes, services, parc automobile et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('fleet','Parc véhicules')}${T('pending','En attente ('+npend+')')}${T('users','Conducteurs existants')}</div><div class="card">${b}</div>`;
 }
 
-function fleetCandidates(line,first){
- const night=isNightLine(line),active=VEH.filter(v=>v.active);
- const by=cat=>active.filter(v=>v.category===cat&&((v.operator==='NoctiCab')===night||v.operator==='Day/NoctiCab'));
- if(line==='A'&&first)return ['26121'];
- if(line==='NT1'&&first)return ['26117'];
- if(line==='B')return ['26126','26125',...by('12m').map(v=>v.fleet_number)];
- if(line==='NT2')return ['26127','26125',...by('12m').map(v=>v.fleet_number)];
- if(line==='C'||line==='NT3')return (first?by('12m'): [...by('10m'),...by('12m')]).map(v=>v.fleet_number);
- if(line==='D'||line==='NT4')return (first?by('18m'): [...by('18m'),...by('12m')]).map(v=>v.fleet_number);
- if(line==='E'||line==='NT5')return by('12m').map(v=>v.fleet_number);
- return [...by('12m'),...by('18m')].map(v=>v.fleet_number);
+// Liste blanche du parc : les numéros sont choisis selon les consignes du réseau.
+// Les véhicules absents du parc (ex. 26130 avant livraison) sont ignorés automatiquement.
+function fleetCandidates(line,ordinal){
+ const night=isNightLine(line);
+ const lists={
+  // Day'Cab
+  A: ordinal===1?['26121']:['26114'],
+  B:['26125','26126','26130'],
+  C:['26103','26104','26105','26106','26114','26121','26122','26123','26124','26128','26129'],
+  D:['26125','26126','26130'],
+  E: ordinal===1
+    ?['26101','26102','26103','26104','26106','26122','26123','26124','26128','26129']
+    :['26101','26102','26103','26104','26106','26121','26122','26123','26124','26128','26129'],
+  // NoctiCab : même logique, avec les véhicules du parc NoctiCab.
+  NT1: ordinal===1?['26117']:['26108','26109','26110','26111','26112','26113','26118','26119','26120'],
+  NT2:['26125','26127','26130'],
+  NT3:['26108','26109','26110','26111','26112','26113','26118','26119','26120'],
+  NT4:['26125','26127','26130'],
+  NT5:['26108','26109','26110']
+ };
+ const allowed=lists[line]||[];
+ return allowed.filter(num=>{const v=veh(num);return !!v&&v.active});
 }
+
 async function autoFleet(){
- if(me.role!=='admin')return;
- const ordered=[...SV].sort((a,b)=>(a.day+a.start_time).localeCompare(b.day+b.start_time));
- const firstByLineDay=new Set(),assignedByService=new Map(),history=new Map();
- const isFree=(num,service)=>(history.get(num)||[]).every(previous=>!overlaps(service,previous));
+ if(!me||me.role!=='admin')return;
+
+ // Ordre chronologique et rang du service sur chaque ligne et chaque journée.
+ const ordered=[...SV].sort((a,b)=>
+  (a.day+a.start_time).localeCompare(b.day+b.start_time)||String(a.id).localeCompare(String(b.id))
+ );
+ const ordinalByService=new Map(),lineCounters=new Map();
  for(const s of ordered){
-  const key=s.day+'|'+s.line_code,first=!firstByLineDay.has(key);
-  firstByLineDay.add(key);
-  const required=(first&&['B','E','NT2','NT5'].includes(s.line_code))?2:1;
-  const candidates=fleetCandidates(s.line_code,first),selected=[];
-  for(let slot=0;slot<required;slot++){
-   let chosen=null;
-   for(const num of candidates){
-    if(selected.includes(num))continue;
-    const v=veh(num);if(!v||!v.active)continue;
-    if(isFree(num,s)){chosen=num;break}
-   }
-   if(!chosen&&['B','NT2'].includes(s.line_code)){
-    const fallback=VEH.filter(v=>v.active&&v.category==='12m'&&!selected.includes(v.fleet_number)&&isFree(v.fleet_number,s)&&((v.operator==='NoctiCab')===isNightLine(s.line_code)||v.operator==='Day/NoctiCab'));
-    chosen=fallback[0]?.fleet_number||null;
-   }
-   if(chosen)selected.push(chosen);
-  }
-  assignedByService.set(s.id,selected);
-  selected.forEach(num=>{if(!history.has(num))history.set(num,[]);history.get(num).push(s)});
+  const key=s.day+'|'+s.line_code;
+  const ordinal=(lineCounters.get(key)||0)+1;
+  lineCounters.set(key,ordinal);
+  ordinalByService.set(s.id,ordinal);
  }
- const changes=ordered.filter(s=>JSON.stringify(s.vehicle_numbers||[])!==JSON.stringify(assignedByService.get(s.id)||[]));
- if(!changes.length){toast('Les affectations sont déjà à jour.',true);return}
+
+ // Un groupe = tous les services d'un même conducteur sur une journée.
+ // Les véhicules de ce groupe restent réservés entre le premier et le dernier service,
+ // y compris pendant les temps d'attente.
+ const groupsByKey=new Map();
+ for(const s of ordered){
+  const key=s.driver_id?`${s.day}|driver:${s.driver_id}`:`${s.day}|service:${s.id}`;
+  if(!groupsByKey.has(key))groupsByKey.set(key,{key,driverId:s.driver_id,services:[],start:null,end:null});
+  const g=groupsByKey.get(key);g.services.push(s);
+  const a=serviceStart(s),b=serviceEnd(s);
+  if(!g.start||a<g.start)g.start=a;
+  if(!g.end||b>g.end)g.end=b;
+ }
+ const groups=[...groupsByKey.values()].sort((a,b)=>a.start-b.start||a.key.localeCompare(b.key));
+ const reservations=new Map(),assignedByService=new Map();
+ const isFree=(num,g)=>{
+  const entries=reservations.get(num)||[];
+  return entries.every(r=>r.owner===g.key||g.end<=r.start||g.start>=r.end);
+ };
+ const reserve=(num,g)=>{
+  if(!reservations.has(num))reservations.set(num,[]);
+  const entries=reservations.get(num);
+  if(!entries.some(r=>r.owner===g.key))entries.push({owner:g.key,start:g.start,end:g.end});
+ };
+ const preferred=(s,candidates)=>{
+  const current=(s.vehicle_numbers||[]).map(String);
+  return current.find(n=>candidates.includes(n))||null;
+ };
+ const choose=(candidates,g,avoid=[])=>{
+  for(const n of candidates){if(!avoid.includes(n)&&isFree(n,g))return n;}
+  return null;
+ };
+
+ for(const g of groups){
+  const services=g.services.sort((a,b)=>serviceStart(a)-serviceStart(b)||String(a.id).localeCompare(String(b.id)));
+  const infos=services.map(s=>({s,ordinal:ordinalByService.get(s.id)||1,candidates:fleetCandidates(s.line_code,ordinalByService.get(s.id)||1)}));
+  const forced=infos.filter(x=>(x.s.line_code==='A'||x.s.line_code==='NT1')&&x.ordinal===1);
+  const regular=infos.filter(x=>!forced.includes(x));
+  const assigned=new Map();
+
+  // Première course A / NT1 : véhicule obligatoire, distinct du véhicule de continuité.
+  for(const x of forced){
+   const num=x.candidates[0]||null;
+   if(num&&isFree(num,g)){assigned.set(x.s.id,[num]);reserve(num,g);}
+   else assigned.set(x.s.id,[]);
+  }
+
+  // Cherche un véhicule commun à tous les autres services de la vacation.
+  // Les affectations déjà présentes servent de préférence (notamment les choix manuels).
+  let common=[];
+  if(regular.length){
+   common=regular[0].candidates.filter(n=>regular.every(x=>x.candidates.includes(n)));
+  }
+  let main=null;
+  if(common.length){
+   const manualOrder=[];
+   for(const x of regular){const n=preferred(x.s,common);if(n&&!manualOrder.includes(n))manualOrder.push(n);}
+   main=choose([...manualOrder,...common.filter(n=>!manualOrder.includes(n))],g);
+  }
+  if(main)reserve(main,g);
+
+  // Si toutes les lignes sont compatibles, le conducteur garde le même bus.
+  // Sinon, on attribue un bus compatible par service, mais chaque bus reste réservé
+  // à ce conducteur pendant toute sa vacation.
+  for(const x of regular){
+   let selected=[];
+   if(main&&x.candidates.includes(main))selected=[main];
+   else{
+    const manual=preferred(x.s,x.candidates);
+    const num=(manual&&isFree(manual,g))?manual:choose(x.candidates,g);
+    if(num){selected=[num];reserve(num,g);}
+   }
+
+   // Les premiers services B, E, NT2 et NT5 restent doublés comme dans les règles initiales.
+   const doubled=(x.ordinal===1&&['B','E','NT2','NT5'].includes(x.s.line_code));
+   if(doubled&&selected.length<2){
+    const candidates=x.candidates;
+    const old=(x.s.vehicle_numbers||[]).map(String).find(n=>candidates.includes(n)&&!selected.includes(n)&&isFree(n,g));
+    const second=old||choose(candidates,g,selected);
+    if(second){selected.push(second);reserve(second,g);}
+   }
+   assigned.set(x.s.id,selected);
+  }
+
+  for(const s of services)assignedByService.set(s.id,assigned.get(s.id)||[]);
+ }
+
+ const changes=ordered.filter(s=>JSON.stringify((s.vehicle_numbers||[]).map(String))!==JSON.stringify(assignedByService.get(s.id)||[]));
+ if(!changes.length){toast('Les affectations sont déjà à jour.',true);return;}
+
  let errors=[];
  for(let i=0;i<changes.length;i+=20){
   const batch=changes.slice(i,i+20);
@@ -502,7 +590,7 @@ async function autoFleet(){
   results.forEach((r,j)=>{if(r.error)errors.push(batch[j].id+': '+r.error.message)});
   if(errors.length)break;
  }
- if(errors.length){toast('Affectation interrompue : '+errors[0]);await load();render();return}
+ if(errors.length){toast('Affectation interrompue : '+errors[0]);await load();render();return;}
  await load();render();toast(`${changes.length} service(s) mis à jour.`,true);
 }
 
@@ -573,7 +661,7 @@ function render(){
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;if(adm==='services')svcPage=0;render()});
  document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{svcPage+=Number(b.dataset.sp);render()});
-  const af=$('#autoFleet');if(af)af.onclick=()=>{if(confirm('Recalculer les affectations de véhicules pour tous les services ? Les affectations actuelles seront remplacées.'))autoFleet()};
+  const af=$('#autoFleet');if(af)af.onclick=()=>{if(confirm('Recalculer les affectations de tous les services ? Les choix déjà présents seront conservés comme préférences lorsqu’ils respectent les règles. Un véhicule sera réservé à chaque conducteur pendant toute sa vacation.'))autoFleet()};
  document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{pmo+=+b.dataset.mp;render()});
  document.querySelectorAll('[data-mh]').forEach(b=>b.onclick=()=>{hmo+=+b.dataset.mh;render()});
  document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=e=>{e.stopPropagation();printSheet(b.dataset.pr)});
