@@ -151,7 +151,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
 const $=s=>document.querySelector(s);
-const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.2 beta &copy; LogiSync</p>';
+const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.3 beta &copy;LogiSync</p>';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0,omo=0,rmo=0,svcPage=0,serviceSyncTimer=null;
 const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['heures','◷','Mes heures'],['equipe','👥','Équipe'],['classement','🏆','Classement'],['messages','✉','Messages']];
@@ -331,7 +331,7 @@ function equipe(){
 }
 function classement(){
  const d=mstart(rmo),y=d.getFullYear(),m=d.getMonth();
- const drivers=Object.values(PR).filter(p=>p.approved&&p.role==='driver');
+ const drivers=Object.values(PR).filter(p=>p.approved&&(p.role==='driver'||p.id===me.id));
  const scores=drivers.map(p=>{
   const services=SV.filter(s=>s.driver_id===p.id&&new Date(s.day+'T12:00').getFullYear()===y&&new Date(s.day+'T12:00').getMonth()===m);
   const minutes=services.reduce((sum,s)=>sum+plan(s).cond,0);
@@ -370,7 +370,7 @@ function plan(s){
  const n=Math.max(1,Math.floor((A+bt)/(cd+bt))),extra=Math.max(0,A-(n*cd+(n-1)*bt));
  const st=[];let t=t0;
  const add=(o,d)=>{o.a=t;o.b=t+d;o.d=d;if(o.k==='hlp')o.stops=[{name:o.from,t:o.a},{name:o.to,t:o.b}];st.push(o);t+=d};
- add({k:'prep',label:'Prise de service',sub:'checklist',from:DEPOT,to:DEPOT},PREP);
+ add({k:'prep',label:'Prise de service',sub:'Préparation du véhicule',from:DEPOT,to:DEPOT},PREP);
  add({k:'hlp',label:'Haut-le-pied',sub:`${DEPOT} → ${ta}`,from:DEPOT,to:ta},HLP_OUT);
  for(let i=1;i<=n;i++){
   const sens=i%2?'A':'R',pp=sens==='A'?pts:[...pts].reverse(),a=t,e=pp[pp.length-1];
@@ -380,7 +380,7 @@ function plan(s){
  const lt=st[st.length-1].to;
  if(extra>0)add({k:'batt',label:'Battement',sub:'au terminus',from:lt,to:lt},extra);
  add({k:'hlp',label:'Haut-le-pied',sub:`${lt} → ${DEPOT}`,from:lt,to:DEPOT},HLP_IN);
- add({k:'fin',label:'Fin de service',sub:'arrivée au dépôt',from:DEPOT,to:DEPOT},FIN);
+ add({k:'fin',label:'Fin de service',sub:'Remisage du véhicule',from:DEPOT,to:DEPOT},FIN);
  const cs=st.filter(x=>x.k==='course'),hs=st.filter(x=>x.k==='hlp');
  let run=0,mx=0;st.forEach(x=>{if(x.k==='course'||x.k==='hlp'){run+=x.d;mx=Math.max(mx,run)}else if(x.k==='batt')run=0});
  return{st,l,ta,tb,t0,tot,n,cs,hlpOut:hs[0],hlpIn:hs[1],first:cs[0],last:cs[cs.length-1],
@@ -398,16 +398,16 @@ function sheetHTML(s){
   return `<div class="sht">${sens==='A'?'Aller':'Retour'} · ${esc(f.from)} → ${esc(f.to)}<span>${P.cs.filter(c=>c.sens===sens).length>10?'10 premières courses':''}</span></div><table><thead><tr><th>Arrêt</th>${cc.map(c=>`<th>C${c.n}</th>`).join('')}</tr></thead><tbody>${f.stops.map((q,i)=>`<tr><td>${esc(q.name)}</td>${cc.map(c=>`<td>${ft(c.stops[i].t)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
  };
  const na=P.cs.filter(c=>c.sens==='A').length,amplt=Math.floor(P.tot/60)+' h '+String(P.tot%60).padStart(2,'0');
- return `<div class="sh"><div class="shh"><div><h1>LogiRide · Trans'Cab</h1><p>Feuille de service</p></div><div class="shn"><small>SERVICE</small><b>${esc(s.id)}</b></div></div>
+ return `<div class="sh"><div class="shh"><div><h1>LogiRide · Trans'Cab</h1><p>Feuille de service</p></div><div class="shn"><small>SERVICE n°</small><b>${esc(s.id)}</b></div></div>
  <div class="shg shg5"><div><small>Ligne</small>${lb(s.line_code)} <b style="font-size:12px">${esc(P.ta)} ↔ ${esc(P.tb)}</b></div><div><small>Jour type</small><b>${typ}</b></div><div><small>Date</small><b style="font-size:13px">${esc(dlong(s.day))}</b></div><div><small>Voiture(s) N°</small><b style="font-size:13px">${esc((s.vehicle_numbers||[]).join(" + ")||"Non affectée")}</b></div><div><small>Conducteur · Matricule</small><b style="font-size:13px">${p?esc(p.prenom+' '+p.nom)+' · '+esc(p.matricule||''):'—'}</b></div></div>
- <div class="shk">${K('Prise de service',ft(P.t0),esc(DEPOT),1)}${K('Sortie dépôt',ft(P.hlpOut.a),'HLP '+HLP_OUT+' min')}${K('1er départ',ft(P.first.a),esc(P.first.from))}${K('Dernière arrivée',ft(P.last.b),P.n+' course'+(P.n>1?'s':''))}${K('Rentrée dépôt',ft(P.hlpIn.b),'HLP '+HLP_IN+' min')}${K('Fin de service',ft(P.t0+P.tot),esc(DEPOT),1)}${K('Amplitude',amplt,'prise → fin de service')}${K('Conduite',P.cond+' min','dont HLP '+(HLP_OUT+HLP_IN)+' min')}${K('Battements',P.batt+' min',(P.n-1)+' au terminus')}${K('Temps annexes',P.ann+' min','checklist')}${K('Courses',P.n,na+' aller · '+(P.n-na)+' retour')}${K('Conduite continue',P.mx+' min','max. sans battement')}</div>
+ <div class="shk">${K('Prise de service',ft(P.t0),esc(DEPOT),1)}${K('Sortie dépôt',ft(P.hlpOut.a),'HLP '+HLP_OUT+' min')}${K('1er départ',ft(P.first.a),esc(P.first.from))}${K('Dernière arrivée',ft(P.last.b),P.n+' course'+(P.n>1?'s':''))}${K('Rentrée dépôt',ft(P.hlpIn.b),'HLP '+HLP_IN+' min')}${K('Fin de service',ft(P.t0+P.tot),esc(DEPOT),1)}${K('Amplitude',amplt,'prise → fin de service')}${K('Conduite',P.cond+' min','dont HLP '+(HLP_OUT+HLP_IN)+' min')}${K('Battements',P.batt+' min',(P.n-1)+' au terminus')}${K('Temps annexes',P.ann+' min','Préparation du véhicule')}${K('Courses',P.n,na+' aller · '+(P.n-na)+' retour')}${K('Conduite continue',P.mx+' min','max. sans battement')}</div>
  <div class="sht">Graphique du service<span>${ft(P.t0)} → ${ft(P.t0+P.tot)}</span></div><div class="shbar">${seg}</div>
  <div class="shlg"><span><i style="background:${esc(lc)}"></i>Conduite commerciale</span><span><i style="background:#555"></i>Haut-le-pied</span><span><i style="background:#fff"></i>Battement</span><span><i style="background:#bbb"></i>Temps annexes</span></div>
  <div class="sht">Déroulement du service<span>Ligne ${esc(s.line_code)} · ${P.n} course${P.n>1?'s':''}</span></div>
  <table><thead><tr><th>Début</th><th>Fin</th><th>Activité</th><th>Sens</th><th>Origine</th><th>Destination</th><th>Durée</th></tr></thead><tbody>${P.st.map(x=>`<tr><td>${ft(x.a)}</td><td>${ft(x.b)}</td><td><b>${esc(x.label)}</b> ${x.k==='course'?'':esc(x.sub)}</td><td class="sn">${x.k==='course'?`<span class="bx">${x.sens}</span>`:''}</td><td>${esc(x.from)}</td><td>${esc(x.to)}</td><td>${hh(x.d)}</td></tr>`).join('')}</tbody></table>
  <div class="sht">Horaires de passage<span>horaires théoriques</span></div>${grp('A')}${grp('R')}
  <div class="shs" style="margin-top:12px"><div><small>Observations</small></div><div><small>Signature du conducteur</small></div><div><small>Visa régulation</small></div></div>
- <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.2 beta &copy; LogiSync</span></div></div>`;
+ <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.3 beta &copy;LogiSync</span></div></div>`;
 }
 
 function service(){
@@ -451,7 +451,7 @@ function drive(){
  <div class="dn2"><span style="font-size:36px">🏠</span><div class="g"><small class="mu">${S.prev?esc(S.prev.label)+' à '+ft(S.prev.a)+(S.prev.k==='prep'?' au dépôt':''):'Début de service'}</small><br><b>${done?'Service terminé':esc(bigOf(S.cur))}</b></div><div class="cdv"><b id="dvcd">${done?'':S.txt}</b><small id="dvcdl" class="mu">${done?'':esc(S.lbl)}</small></div></div>
  <button class="big" id="dvgo">${done?'Quitter le mode conduite':esc(btnOf(S.cur))}</button>
  <div class="chips"><span>Service ${esc(s.id)}</span><span>Fin de service ${ft(P.t0+P.tot)}</span></div>
- <div class="dd"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="margin:0">Déroulé du service</h2><span class="mu">Espace ou Entrée : valider l’étape</span></div>${P.st.map((x,i)=>`<div class="di ${i<D.n?'done':i===D.n?'now':''}"><div><b>${esc(x.k==='course'?`Course ${x.n} · ${x.from} → ${x.to}`:x.k==='hlp'?`Haut-le-pied · ${x.from} → ${x.to}`:x.label)}</b><small>${x.k==='prep'?'checklist':x.k==='fin'?'arrivée au dépôt':x.k==='batt'?'au terminus':x.k==='course'?(x.sens==='A'?'aller':'retour'):'trajet à vide'}</small></div><span class="t">${i<D.n?'✓ ':''}${x.k==='prep'||x.k==='fin'?ft(x.a):ft(x.a)+' → '+ft(x.b)}</span></div>`).join('')}</div>`;
+ <div class="dd"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="margin:0">Déroulé du service</h2><span class="mu">Espace ou Entrée : valider l’étape</span></div>${P.st.map((x,i)=>`<div class="di ${i<D.n?'done':i===D.n?'now':''}"><div><b>${esc(x.k==='course'?`Course ${x.n} · ${x.from} → ${x.to}`:x.k==='hlp'?`Haut-le-pied · ${x.from} → ${x.to}`:x.label)}</b><small>${x.k==='prep'?'checklist':x.k==='fin'?'Remisage du véhicule':x.k==='batt'?'au terminus':x.k==='course'?(x.sens==='A'?'aller':'retour'):'trajet à vide'}</small></div><span class="t">${i<D.n?'✓ ':''}${x.k==='prep'||x.k==='fin'?ft(x.a):ft(x.a)+' → '+ft(x.b)}</span></div>`).join('')}</div>`;
  return `<div class="dv"><div class="dr"><button class="rb on" title="Conduite">➤</button><a class="rb" href="#messages" title="Messages">✉</a><button class="rb" id="dvreset" title="Recommencer le déroulé">↺</button><button class="rb x" id="dvquit" title="Quitter" style="margin-top:auto">✕</button></div><div class="dl" data-idx="${S.idx}">${left}</div><div class="dm">${right}</div></div>`;
 }
 function dvalid(){
