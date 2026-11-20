@@ -149,7 +149,7 @@ const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_pu
 const $=s=>document.querySelector(s);
 const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.2 beta &copy; LogiSync</p>';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0;
+let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0,svcPage=0,serviceSyncTimer=null;
 const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['heures','◷','Mes heures'],['messages','✉','Messages']];
 const view=()=>(location.hash||'#journee').slice(1);
 const hm=t=>(t||'').slice(0,5);
@@ -173,16 +173,24 @@ function toast(m,ok){const t=$('#toast');t.style.background=ok?'var(--ok)':'var(
 const twice=(b,fn)=>{b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Confirmer la suppression';return}fn()}};
 async function act(p){const{error}=await p;if(error){toast(error.code==='23503'?'Impossible : des services utilisent encore cette ligne.':error.message);return false}await load();render();return true}
 
+// Charge les pages Supabase en parallèle par petits lots au lieu de les demander une par une.
 async function allServices(){
- let all=[],start=0;
- while(true){
-  const {data,error}=await sb.from('services').select('*').order('day').order('start_time').order('id').range(start,start+999);
-  if(error)return {data:null,error};
-  all.push(...(data||[]));
-  if(!data||data.length<1000)break;
-  start+=1000;
+ const countResult=await sb.from('services').select('id',{count:'exact',head:true});
+ if(countResult.error)return {data:null,error:countResult.error};
+ const total=countResult.count||0,pageSize=1000,all=new Array(total);
+ for(let base=0;base<total;base+=6000){
+  const jobs=[];
+  for(let start=base;start<Math.min(base+6000,total);start+=pageSize){
+   jobs.push(sb.from('services').select('*').order('day').order('start_time').order('id').range(start,Math.min(start+pageSize-1,total-1)));
+  }
+  const results=await Promise.all(jobs);
+  for(let i=0;i<results.length;i++){
+   if(results[i].error)return {data:null,error:results[i].error};
+   const start=base+i*pageSize;
+   (results[i].data||[]).forEach((item,j)=>{all[start+j]=item});
+  }
  }
- return {data:all,error:null};
+ return {data:all.filter(Boolean),error:null};
 }
 async function load(){
  const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),allServices(),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role,approved'),sb.from('vehicles').select('*').order('fleet_number')]);
@@ -198,8 +206,13 @@ function subscribe(){
  if(live)return;live=true;
  sb.channel('live').on('postgres_changes',{event:'*',schema:'public',table:'messages'},async()=>{
   MG=(await sb.from('messages').select('*').order('created_at').limit(100)).data||[];if(view()==='messages')paintMsgs()})
- .on('postgres_changes',{event:'*',schema:'public',table:'services'},async()=>{
-  SV=(await allServices()).data||[];if(me&&!$('#dlg').open&&view()!=='messages')render()}).subscribe();
+ .on('postgres_changes',{event:'*',schema:'public',table:'services'},payload=>{
+  // La ligne reçue suffit : ne jamais recharger les 35 000 services pour une seule modification.
+  const item=payload.new&&payload.new.id?payload.new:null,old=payload.old&&payload.old.id?payload.old:null;
+  if(payload.eventType==='DELETE'&&old)SV=SV.filter(x=>x.id!==old.id);
+  else if(item){const i=SV.findIndex(x=>x.id===item.id);if(i>=0)SV[i]=item;else SV.push(item)}
+  clearTimeout(serviceSyncTimer);serviceSyncTimer=setTimeout(()=>{if(me&&!$('#dlg').open&&view()!=='messages')render()},350);
+ }).subscribe();
 }
 
 function authView(){
@@ -434,7 +447,7 @@ function driveTick(){
 function admin(){
  let b;const npend=Object.values(PR).filter(p=>!p.approved).length;
  if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires · course ${trj(x)[0]} min · repos ${trj(x)[1]} min</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
- else if(adm==='services')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length} services</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+SV.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'} · ${esc(vehText(s)||'Véhicule non affecté')}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('');
+ else if(adm==='services'){const size=100,pageCount=Math.max(1,Math.ceil(SV.length/size));svcPage=Math.min(svcPage,pageCount-1);const shown=SV.slice(svcPage*size,(svcPage+1)*size);b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length.toLocaleString('fr-FR')} services · page ${svcPage+1}/${pageCount}</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+shown.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'} · ${esc(vehText(s)||'Véhicule non affecté')}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('')+`<div class="row" style="justify-content:center;margin-top:14px"><button class="btn" data-sp="-1" ${svcPage===0?'disabled':''}>Précédent</button><span class="mu">${(svcPage*size+1).toLocaleString('fr-FR')}–${Math.min((svcPage+1)*size,SV.length).toLocaleString('fr-FR')} sur ${SV.length.toLocaleString('fr-FR')}</span><button class="btn" data-sp="1" ${svcPage>=pageCount-1?'disabled':''}>Suivant</button></div>`;}
  else if(adm==='fleet')b=`<div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b>${VEH.length} véhicules au parc</b><p class="sub" style="margin:2px 0 0">Affectations calculées selon les lignes, les horaires et les disponibilités simultanées.</p></div><button class="btn p" id="autoFleet">Affecter automatiquement</button></div>`+VEH.map(v=>`<div class="sv" style="cursor:default"><span class="ln">${esc(v.fleet_number)}</span><div class="i"><b>${esc(v.model)}</b><small>${esc(v.operator)} · ${esc(v.category)}${v.length_m?' · '+esc(v.length_m)+' m':''}${v.doors?' · '+esc(v.doors)+' portes':''}${v.active?'':' · Non disponible'}</small></div></div>`).join('');
  else if(adm==='pending'){const w=Object.values(PR).filter(p=>!p.approved);b=w.length?w.map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>Matricule : ${esc(p.matricule)}</small></div><button class="btn p" data-ok="${p.id}">Valider</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Refuser</button></div>`).join(''):'<p class="sub">Aucun compte en attente.</p>'}
  else b=Object.values(PR).filter(p=>p.approved).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Supprimer</button>`}</div>`).join('');
@@ -457,7 +470,8 @@ function fleetCandidates(line,first){
 async function autoFleet(){
  if(me.role!=='admin')return;
  const ordered=[...SV].sort((a,b)=>(a.day+a.start_time).localeCompare(b.day+b.start_time));
- const firstByLineDay=new Set(),assignedByService=new Map(),history=[];
+ const firstByLineDay=new Set(),assignedByService=new Map(),history=new Map();
+ const isFree=(num,service)=>(history.get(num)||[]).every(previous=>!overlaps(service,previous));
  for(const s of ordered){
   const key=s.day+'|'+s.line_code,first=!firstByLineDay.has(key);
   firstByLineDay.add(key);
@@ -468,16 +482,16 @@ async function autoFleet(){
    for(const num of candidates){
     if(selected.includes(num))continue;
     const v=veh(num);if(!v||!v.active)continue;
-    if(!history.some(h=>h.num===num&&overlaps(s,h.service))){chosen=num;break}
+    if(isFree(num,s)){chosen=num;break}
    }
    if(!chosen&&['B','NT2'].includes(s.line_code)){
-    const fallback=VEH.filter(v=>v.active&&v.category==='12m'&&!selected.includes(v.fleet_number)&&!history.some(h=>h.num===v.fleet_number&&overlaps(s,h.service))&&((v.operator==='NoctiCab')===isNightLine(s.line_code)||v.operator==='Day/NoctiCab'));
+    const fallback=VEH.filter(v=>v.active&&v.category==='12m'&&!selected.includes(v.fleet_number)&&isFree(v.fleet_number,s)&&((v.operator==='NoctiCab')===isNightLine(s.line_code)||v.operator==='Day/NoctiCab'));
     chosen=fallback[0]?.fleet_number||null;
    }
    if(chosen)selected.push(chosen);
   }
   assignedByService.set(s.id,selected);
-  selected.forEach(num=>history.push({num,service:s}));
+  selected.forEach(num=>{if(!history.has(num))history.set(num,[]);history.get(num).push(s)});
  }
  const changes=ordered.filter(s=>JSON.stringify(s.vehicle_numbers||[])!==JSON.stringify(assignedByService.get(s.id)||[]));
  if(!changes.length){toast('Les affectations sont déjà à jour.',true);return}
@@ -527,7 +541,9 @@ function svcDlg(id){
   if(!id&&SV.some(x=>x.id===n))return er('Ce numéro existe déjà.');
   const r=await sb.from('services').upsert({id:n,line_code:$('#s2').value,day:$('#s3').value,start_time:$('#s4').value,end_time:$('#s5').value,detail:$('#s6').value.trim(),driver_id:$('#s7').value||null,vehicle_numbers:[...$('#s8').selectedOptions].map(o=>o.value)});
   if(r.error)return er(r.error.message);
-  close();await load();render();
+  const updated={id:n,line_code:$('#s2').value,day:$('#s3').value,start_time:$('#s4').value,end_time:$('#s5').value,detail:$('#s6').value.trim(),driver_id:$('#s7').value||null,vehicle_numbers:[...$('#s8').selectedOptions].map(o=>o.value)};
+  const index=SV.findIndex(x=>x.id===n);if(index>=0)SV[index]=updated;else SV.push(updated);
+  close();render();toast('Service enregistré.',true);
  };
  const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
 }
@@ -555,7 +571,8 @@ function render(){
  if(v!=='drive')$('#app').insertAdjacentHTML('beforeend',FOOT);
  document.querySelectorAll('.sv[data-id],.chip[data-id],.js[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
- document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
+ document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;if(adm==='services')svcPage=0;render()});
+ document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{svcPage+=Number(b.dataset.sp);render()});
   const af=$('#autoFleet');if(af)af.onclick=()=>{if(confirm('Recalculer les affectations de véhicules pour tous les services ? Les affectations actuelles seront remplacées.'))autoFleet()};
  document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{pmo+=+b.dataset.mp;render()});
  document.querySelectorAll('[data-mh]').forEach(b=>b.onclick=()=>{hmo+=+b.dataset.mh;render()});
