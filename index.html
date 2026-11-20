@@ -8,6 +8,8 @@
 <link rel="apple-touch-icon" href="logo.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
 <style>
+ nav .more{display:none}
+nav .sheet{display:contents}
 :root{--bg:#2e1a47;--side:#24143a;--card:#38235a;--line:#523a7c;--tx:#f4eefc;--mu:#bba9d8;--ac:#a98bff;--acx:#1d0f33;--rd:#ff7a88;--ok:#4ade80;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh;padding-top:env(safe-area-inset-top,0px)}
@@ -15,7 +17,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-grad
 nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
 nav a{width:68px;padding:9px 0;border-radius:12px;text-align:center;color:var(--mu);font-size:12px;cursor:pointer}
 nav a b{display:block;font-size:20px;font-weight:400}nav a.on{background:var(--ac);color:var(--acx)}
-nav .lg{font-weight:800;color:var(--ac);margin-bottom:10px}
+nav .lg{height:36px;font-size:0;margin-bottom:10px}
 main{flex:1;max-width:1200px;margin:0 auto;padding:26px 28px 60px;min-width:0}
 h1{font-size:28px;margin:0}h2{font-size:17px;margin:0 0 12px}.sub{color:var(--mu);margin:2px 0 20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
@@ -72,11 +74,23 @@ label{display:block;font-weight:600;font-size:14px;margin-bottom:10px}label inpu
 dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;width:min(560px,92vw);padding:22px;max-height:90vh}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:30;max-width:90vw}
-#logo{position:fixed;top:5px;left:10px;width:146px;height:56px;object-fit:contain;z-index:6}body.in #logo{left:88px}
-#clock{position:fixed;top:16px;right:26px;text-align:right;line-height:1.1;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+#logo{position:fixed;top:5px;left:10px;width:146px;height:56px;object-fit:contain;z-index:6}
+body.in #logo{left:8px;top:6px;width:68px;height:48px}
+#clock{position:fixed;top:10px;right:20px;text-align:right;line-height:1.1;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums;background:var(--side);border:1px solid var(--line);border-radius:14px;padding:8px 16px}
 #clock b{display:block;font-size:36px;font-weight:800}#clock span{font-size:13px;color:var(--mu)}
 @media(max-width:1000px){.kpi{grid-template-columns:repeat(3,1fr)}.kpi div:nth-child(4){border-left:0}.hgrid{grid-template-columns:1fr}}
-@media(max-width:760px){nav{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;z-index:5;border-right:0;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}nav a{width:auto;flex:1;font-size:10px}nav a b{font-size:18px}nav .lg{display:none}main{padding:44px 14px 100px}.grid{grid-template-columns:1fr}#clock{top:8px;right:12px}#logo,body.in #logo{width:90px;height:30px;top:8px;left:10px}#clock b{font-size:22px}#clock span{display:none}.kpi{grid-template-columns:repeat(2,1fr)}.kpi div{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:760px).cal{min-width:0;grid-template-columns:repeat(7,1fr);gap:3px}
+.card.scr{padding:8px}
+.day{display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start;min-height:64px;padding:3px}
+.day .dn{width:100%;margin:0}
+.chip{padding:0;border:0;background:none}.chip span:not(.ln){display:none}
+.chip .ln{min-width:22px;font-size:13px;padding:2px 4px} nav a{width:auto;flex:1;font-size:11px}nav a b{font-size:22px}
+nav .more{display:flex;flex-direction:column;align-items:center;flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;padding:9px 0;border-radius:12px;cursor:pointer}
+nav .more b{font-size:22px;font-weight:400}nav .more.on{background:var(--ac);color:var(--acx)}
+nav .sheet{display:none;position:fixed;left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--side);border:1px solid var(--line);border-radius:16px;padding:10px;grid-template-columns:repeat(3,1fr);gap:6px;z-index:6;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+nav.open .sheet{display:grid}
+nav .sheet a{flex:none;font-size:12px;padding:12px 0}
+ nav .lg{display:none}main{padding:44px 14px 100px}.grid{grid-template-columns:1fr}#clock{top:8px;right:12px;padding:4px 10px}body.in::after{display:none}#logo,body.in #logo{width:90px;height:30px;top:8px;left:10px}#clock b{font-size:22px}#clock span{display:none}.kpi{grid-template-columns:repeat(2,1fr)}.kpi div{border-left:0;border-top:1px solid var(--line)}}
 @media(min-width:761px) and (max-width:1560px){main{padding-top:76px}}
 #sheet{display:none;width:100%}
 .sh{font-family:"Segoe UI",system-ui,sans-serif;color:#000;background:#fff;padding:4mm}
@@ -247,8 +261,11 @@ function authView(){
 function nav(v){
  const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';document.body.classList.add('in');
- $('#nav').innerHTML='<div class="lg">LogiRide</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
- document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
+  const main=['journee','services','planning','heures'],rest=a.filter(x=>!main.includes(x[0]));
+ const A=([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`;
+ $('#nav').innerHTML=a.filter(x=>main.includes(x[0])).map(A).join('')+`<button class="more ${rest.some(x=>x[0]===v)?'on':''}" id="more"><b>☰</b>Plus</button><div class="sheet">${rest.map(A).join('')}</div>`;
+ document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>{$('#nav').classList.remove('open');location.hash=x.dataset.r};x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
+ $('#more').onclick=e=>{e.stopPropagation();$('#nav').classList.toggle('open')};
 }
 function row(s,pr){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}${(s.vehicle_numbers||[]).length?' · 🚍 '+esc(vehText(s)):''}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span>${pr?`<button class="btn" data-pr="${esc(s.id)}" style="padding:4px 10px;font-size:13px">🖨 Imprimer</button>`:''}<span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
 const at=(d,t)=>new Date(d+'T'+hm(t)+':00');
