@@ -67,7 +67,7 @@ label{display:block;font-weight:600;font-size:14px;margin-bottom:10px}label inpu
 .sw{background:none;border:0;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
 dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;width:min(560px,92vw);padding:22px;max-height:90vh}
 dialog::backdrop{background:rgba(0,0,0,.6)}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:9;max-width:90vw}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:30;max-width:90vw}
 #logo{position:fixed;top:5px;left:10px;width:146px;height:56px;object-fit:contain;z-index:6}body.in #logo{left:88px}
 #clock{position:fixed;top:16px;right:26px;text-align:right;line-height:1.1;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 #clock b{display:block;font-size:36px;font-weight:800}#clock span{font-size:13px;color:var(--mu)}
@@ -86,6 +86,52 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .sh th{background:#000;color:#fff;font-size:11px;letter-spacing:.08em}
 .shs{display:grid;grid-template-columns:2fr 1fr 1fr;border:1px solid #000;min-height:120px}.shs div{padding:6px 8px;border-left:1px solid #000}.shs div:first-child{border-left:0}
 .shf{margin-top:10px;font-size:10px;color:#444;display:flex;justify-content:space-between}
+.shk{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid #000;margin-bottom:12px}
+.shk div{padding:5px 7px;border-left:1px solid #000;border-top:1px solid #000;min-height:44px}
+.shk div:nth-child(6n+1){border-left:0}.shk div:nth-child(-n+6){border-top:0}
+.shk div.bk{background:#000;color:#fff}.shk small{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#555}
+.shk .bk small,.shk .bk i{color:#ccc}.shk b{display:block;font-size:15px}.shk i{display:block;font-style:normal;font-size:9px;color:#555}
+.shg5{grid-template-columns:1.6fr 1fr 1.3fr .8fr 1.3fr}
+.shbar{display:flex;height:16px;border:1px solid #000;margin:4px 0}.shbar span{display:block;height:100%}
+.shlg{display:flex;gap:14px;font-size:10px;color:#444;margin-bottom:10px}.shlg i{display:inline-block;width:10px;height:10px;border:1px solid #000;margin-right:4px;vertical-align:-1px}
+.sht{font-size:11px;letter-spacing:.15em;font-weight:700;text-transform:uppercase;margin:10px 0 4px;display:flex;justify-content:space-between}.sht span{font-weight:400;letter-spacing:0;color:#444}
+.sh td.sn{text-align:center;width:36px}.sh .bx{display:inline-block;border:1px solid #000;padding:0 4px;font-size:11px}
+.paper{background:#fff;color:#000;border-radius:6px;padding:10px;max-width:860px;margin:0 auto;box-shadow:0 4px 18px rgba(0,0,0,.4);overflow-x:auto}
+.sgrid{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:16px;align-items:start}
+.st{position:relative;padding:8px 0 8px 76px;min-height:56px}
+.st::before{content:"";position:absolute;left:62px;top:0;bottom:0;width:2px;background:var(--c,var(--line))}
+.st:first-child::before{top:14px}.st:last-child::before{bottom:calc(100% - 26px)}
+.st::after{content:"";position:absolute;left:57px;top:13px;width:12px;height:12px;border-radius:50%;border:2px solid var(--mu);background:var(--bg)}
+.st .ti{position:absolute;left:0;top:8px;font-variant-numeric:tabular-nums}
+.st .rt{position:absolute;right:0;top:8px;text-align:right;color:var(--mu);font-size:12px}
+.bx2{border:1px solid var(--mu);border-radius:4px;padding:0 5px;font-size:12px}
+.dv{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;grid-template-columns:84px minmax(0,1fr) minmax(0,1.1fr);overflow:hidden}
+.dr{background:var(--side);display:flex;flex-direction:column;gap:10px;padding:14px 12px;align-items:center}
+.rb{width:60px;height:60px;border-radius:14px;border:0;background:var(--card);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.rb.on{background:#4f8cff;color:#fff}.rb.x{background:#e5604f;color:#fff}
+.dl{border-right:1px solid var(--line);overflow:auto}
+.dh{display:flex;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.hb{background:#56627a;color:#fff;font-weight:800;border-radius:8px;padding:6px 10px;font-size:20px}
+.sp{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:14px 20px;position:relative}
+.sp::before{content:"";position:absolute;left:37px;top:0;bottom:0;width:4px;background:#56627a}
+.sp:first-of-type::before{top:50%}.sp:last-child::before{bottom:50%}
+.sp i{width:22px;height:22px;border-radius:50%;border:4px solid #cfd6e6;background:var(--bg);position:relative;z-index:1;margin-left:6px}
+.sp b{font-size:20px;font-weight:500}.sp small{display:block;color:var(--mu)}.sp>span{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.sp.cur{background:rgba(79,140,255,.16)}.sp.cur b{font-size:26px;font-weight:700}.sp.cur i{width:34px;height:34px;margin-left:0;border-color:#fff}
+.dm{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+.dtop{display:grid;grid-template-columns:1fr 200px;gap:12px}
+.pn{border-radius:14px;padding:12px 18px;color:#0b2a14;font-weight:800}.pn b{font-size:28px;display:block}
+.pn.ok{background:#5ec27c}.pn.late{background:#ff8a96}.pn.early{background:#7db0ff;color:#0b1d3a}
+.dc{background:var(--side);border-radius:14px;padding:12px 16px;text-align:center}.dc b{font-size:32px;display:block;font-variant-numeric:tabular-nums}.dc small{color:var(--mu)}
+.dn2{background:var(--side);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px}
+.dn2 .g{flex:1}.dn2 .g b{font-size:26px}.dn2 .cdv{text-align:right}.dn2 .cdv b{font-size:38px;display:block;font-variant-numeric:tabular-nums}
+.big{background:#4f8cff;color:#fff;border:0;border-radius:14px;padding:18px;font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span{background:var(--card);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;color:#9cc0ff}
+.dd{background:var(--side);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.di{display:flex;align-items:center;gap:12px;padding:10px 8px;border-top:1px solid var(--line)}.di.done{opacity:.5}.di.now{background:rgba(79,140,255,.18);border-radius:10px}
+.di>div{flex:1;min-width:0}.di small{display:block;color:var(--mu)}.di .t{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:1000px){.sgrid{grid-template-columns:1fr}}
+@media(max-width:900px){.dv{grid-template-columns:64px 1fr}.dl{display:none}.dtop{grid-template-columns:1fr}.rb{width:48px;height:48px}}
 @page{size:A4;margin:10mm}
 @media print{:root{--bg:#fff;--card:#fff;--side:#fff;--tx:#000;--mu:#444;--line:#999}nav,#clock,#toast,.noprint{display:none!important}body::before{display:none}.sh,.sh *{-webkit-print-color-adjust:exact;print-color-adjust:exact}body.ps>*:not(#sheet){display:none!important}body.ps #sheet{display:block}}
 </style>
@@ -165,7 +211,7 @@ function authView(){
 function nav(v){
  const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';document.body.classList.add('in');
- $('#nav').innerHTML='<div class="lg">LogiRide</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ $('#nav').innerHTML='<div class="lg">V0.2b</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
 }
 function row(s,pr){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span>${pr?`<button class="btn" data-pr="${esc(s.id)}" style="padding:4px 10px;font-size:13px">🖨 Imprimer</button>`:''}<span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
@@ -239,23 +285,136 @@ function messages(){
  return `<h1>Messagerie interne LogiRide</h1><p class="sub">Régulation et équipe du dépôt Trans'Cab.</p><div class="card"><div class="msgs" id="ms">${msgHtml()}</div><form id="mf" class="row" style="flex-wrap:nowrap"><input id="mi" style="flex:1" placeholder="Écrire un message" aria-label="Message">${me.role==='admin'?'<label style="margin:0;white-space:nowrap"><input type="checkbox" id="mx"> Important</label>':''}<button class="btn p">Envoyer</button></form></div>`;
 }
 
-function detail(id){
- const s=SV.find(x=>x.id===id);if(!s)return;
- const l=L.find(x=>x.code===s.line_code)||{},pts=[l.terminus_a,...ST.filter(x=>x.line_code===s.line_code).map(x=>x.name),l.terminus_b].filter(Boolean);
- dlg(`<div class="row">${lb(s.line_code)}<h2 style="margin:0">Service ${esc(s.id)}</h2></div><p class="sub">${fd(s.day)} · ${esc(s.detail)}</p>
- <div class="stats"><div><small>Début</small><b>${hm(s.start_time)}</b></div><div><small>Fin</small><b>${hm(s.end_time)}</b></div><div><small>Amplitude</small><b>${amp(s.start_time,s.end_time)}</b></div></div>
- <h2>Arrêts de la ligne</h2><div class="tl">${pts.length?pts.map((p,i)=>`<p><b>${esc(p)}</b>${i===0?'<small> · terminus de départ</small>':i===pts.length-1?'<small> · terminus d’arrivée</small>':''}</p>`).join(''):'<p class="sub">Aucun arrêt défini.</p>'}</div>
- <div class="row" style="justify-content:flex-end"><button class="btn" onclick="close()">Fermer</button>${s.driver_id===me.id?'<button class="btn" id="pr">🖨 Imprimer</button>':''}${me.role==='admin'?'<button class="btn" id="ed">Modifier</button>':''}${!s.driver_id?'<button class="btn p" id="take">Prendre ce service</button>':s.driver_id===me.id?'<button class="btn" id="drop" style="color:var(--rd)">Rendre mon service</button>':''}</div>`);
- const g=i=>$(i);
- if(g('#take'))g('#take').onclick=async()=>{if(await act(sb.from('services').update({driver_id:me.id}).eq('id',id).is('driver_id',null)))close()};
- if(g('#drop'))g('#drop').onclick=async()=>{if(await act(sb.from('services').update({driver_id:null}).eq('id',id).eq('driver_id',me.id)))close()};
- if(g('#ed'))g('#ed').onclick=()=>svcDlg(id);
- if(g('#pr'))g('#pr').onclick=()=>printSheet(id);
+function detail(id){location.hash='s-'+id}
+const DEPOT='Dépôt des Aliziers - Lencorne',PREP=2,HLP_OUT=3,HLP_IN=5,FIN=0;
+// Temps de trajet par ligne : [durée d'une course (aller ou retour), repos au terminus] en minutes
+const trj=l=>{const T=TRAJ[String(l.code).toUpperCase()]||[10,5];return[Number.isInteger(l.course_min)&&l.course_min>0?l.course_min:T[0],Number.isInteger(l.repos_min)&&l.repos_min>=0?l.repos_min:T[1]]};
+const TRAJ={A:[10,5],B:[10,5],C:[6,5],D:[8,5],E:[15,5],NT1:[10,5],NT2:[10,5],NT3:[6,5],NT4:[8,5],NT5:[15,5]};
+const ft=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dm=d=>d<60?d+' min':Math.floor(d/60)+' h '+String(d%60).padStart(2,'0');
+const hh=d=>Math.floor(d/60)+':'+String(d%60).padStart(2,'0');
+const dlong=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+function plan(s){
+ const l=L.find(x=>x.code===s.line_code)||{},ta=l.terminus_a||'Terminus A',tb=l.terminus_b||'Terminus B';
+ const pts=[ta,...ST.filter(x=>x.line_code===s.line_code).map(x=>x.name),tb];
+ const[cd,bt]=trj({code:s.line_code,course_min:l.course_min,repos_min:l.repos_min});
+ const t0=tmin(s.start_time),tot=dur(s)||1440,A=tot-PREP-HLP_OUT-HLP_IN-FIN;
+ const n=Math.max(1,Math.floor((A+bt)/(cd+bt))),extra=Math.max(0,A-(n*cd+(n-1)*bt));
+ const st=[];let t=t0;
+ const add=(o,d)=>{o.a=t;o.b=t+d;o.d=d;if(o.k==='hlp')o.stops=[{name:o.from,t:o.a},{name:o.to,t:o.b}];st.push(o);t+=d};
+ add({k:'prep',label:'Prise de service',sub:'checklist',from:DEPOT,to:DEPOT},PREP);
+ add({k:'hlp',label:'Haut-le-pied',sub:`${DEPOT} → ${ta}`,from:DEPOT,to:ta},HLP_OUT);
+ for(let i=1;i<=n;i++){
+  const sens=i%2?'A':'R',pp=sens==='A'?pts:[...pts].reverse(),a=t,e=pp[pp.length-1];
+  add({k:'course',n:i,sens,label:`Course ${i}`,from:pp[0],to:e,sub:`${pp[0]} → ${e}`,stops:pp.map((nm,j)=>({name:nm,t:a+Math.round(j*cd/Math.max(1,pp.length-1))}))},cd);
+  if(i<n)add({k:'batt',label:'Battement',sub:'au terminus',from:e,to:e},bt);
+ }
+ const lt=st[st.length-1].to;
+ if(extra>0)add({k:'batt',label:'Battement',sub:'au terminus',from:lt,to:lt},extra);
+ add({k:'hlp',label:'Haut-le-pied',sub:`${lt} → ${DEPOT}`,from:lt,to:DEPOT},HLP_IN);
+ add({k:'fin',label:'Fin de service',sub:'arrivée au dépôt',from:DEPOT,to:DEPOT},FIN);
+ const cs=st.filter(x=>x.k==='course'),hs=st.filter(x=>x.k==='hlp');
+ let run=0,mx=0;st.forEach(x=>{if(x.k==='course'||x.k==='hlp'){run+=x.d;mx=Math.max(mx,run)}else if(x.k==='batt')run=0});
+ return{st,l,ta,tb,t0,tot,n,cs,hlpOut:hs[0],hlpIn:hs[1],first:cs[0],last:cs[cs.length-1],
+  cond:n*cd+HLP_OUT+HLP_IN,batt:(n-1)*bt+extra,ann:PREP+FIN,mx};
+}
+
+function sheetHTML(s){
+ const P=plan(s),p=PR[s.driver_id]||(s.driver_id===me.id?me:null),lc=(L.find(x=>x.code===s.line_code)||{}).bg||'#f0c000';
+ const typ=['Dimanche','Semaine','Semaine','Semaine','Semaine','Semaine','Samedi'][new Date(s.day+'T12:00').getDay()];
+ const K=(t,v,sub,bk)=>`<div class="${bk?'bk':''}"><small>${t}</small><b>${v}</b><i>${sub}</i></div>`;
+ const seg=P.st.map(x=>`<span style="width:${x.d/P.tot*100}%;background:${x.k==='course'?esc(lc):x.k==='hlp'?'#555':x.k==='batt'?'#fff':'#bbb'}"></span>`).join('');
+ const grp=sens=>{
+  const cc=P.cs.filter(c=>c.sens===sens).slice(0,10);if(!cc.length||cc[0].stops.length<2)return '';
+  const f=cc[0];
+  return `<div class="sht">${sens==='A'?'Aller':'Retour'} · ${esc(f.from)} → ${esc(f.to)}<span>${P.cs.filter(c=>c.sens===sens).length>10?'10 premières courses':''}</span></div><table><thead><tr><th>Arrêt</th>${cc.map(c=>`<th>C${c.n}</th>`).join('')}</tr></thead><tbody>${f.stops.map((q,i)=>`<tr><td>${esc(q.name)}</td>${cc.map(c=>`<td>${ft(c.stops[i].t)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+ };
+ const na=P.cs.filter(c=>c.sens==='A').length,amplt=Math.floor(P.tot/60)+' h '+String(P.tot%60).padStart(2,'0');
+ return `<div class="sh"><div class="shh"><div><h1>LogiRide · Trans'Cab</h1><p>Feuille de service</p></div><div class="shn"><small>SERVICE</small><b>${esc(s.id)}</b></div></div>
+ <div class="shg shg5"><div><small>Ligne</small>${lb(s.line_code)} <b style="font-size:12px">${esc(P.ta)} ↔ ${esc(P.tb)}</b></div><div><small>Jour type</small><b>${typ}</b></div><div><small>Date</small><b style="font-size:13px">${esc(dlong(s.day))}</b></div><div><small>Voiture N°</small></div><div><small>Conducteur · Matricule</small><b style="font-size:13px">${p?esc(p.prenom+' '+p.nom)+' · '+esc(p.matricule||''):'—'}</b></div></div>
+ <div class="shk">${K('Prise de service',ft(P.t0),esc(DEPOT),1)}${K('Sortie dépôt',ft(P.hlpOut.a),'HLP '+HLP_OUT+' min')}${K('1er départ',ft(P.first.a),esc(P.first.from))}${K('Dernière arrivée',ft(P.last.b),P.n+' course'+(P.n>1?'s':''))}${K('Rentrée dépôt',ft(P.hlpIn.b),'HLP '+HLP_IN+' min')}${K('Fin de service',ft(P.t0+P.tot),esc(DEPOT),1)}${K('Amplitude',amplt,'prise → fin de service')}${K('Conduite',P.cond+' min','dont HLP '+(HLP_OUT+HLP_IN)+' min')}${K('Battements',P.batt+' min',(P.n-1)+' au terminus')}${K('Temps annexes',P.ann+' min','checklist')}${K('Courses',P.n,na+' aller · '+(P.n-na)+' retour')}${K('Conduite continue',P.mx+' min','max. sans battement')}</div>
+ <div class="sht">Graphique du service<span>${ft(P.t0)} → ${ft(P.t0+P.tot)}</span></div><div class="shbar">${seg}</div>
+ <div class="shlg"><span><i style="background:${esc(lc)}"></i>Conduite commerciale</span><span><i style="background:#555"></i>Haut-le-pied</span><span><i style="background:#fff"></i>Battement</span><span><i style="background:#bbb"></i>Temps annexes</span></div>
+ <div class="sht">Déroulement du service<span>Ligne ${esc(s.line_code)} · ${P.n} course${P.n>1?'s':''}</span></div>
+ <table><thead><tr><th>Début</th><th>Fin</th><th>Activité</th><th>Sens</th><th>Origine</th><th>Destination</th><th>Durée</th></tr></thead><tbody>${P.st.map(x=>`<tr><td>${ft(x.a)}</td><td>${ft(x.b)}</td><td><b>${esc(x.label)}</b> ${x.k==='course'?'':esc(x.sub)}</td><td class="sn">${x.k==='course'?`<span class="bx">${x.sens}</span>`:''}</td><td>${esc(x.from)}</td><td>${esc(x.to)}</td><td>${hh(x.d)}</td></tr>`).join('')}</tbody></table>
+ <div class="sht">Horaires de passage<span>horaires théoriques</span></div>${grp('A')}${grp('R')}
+ <div class="shs" style="margin-top:12px"><div><small>Observations</small></div><div><small>Signature du conducteur</small></div><div><small>Visa régulation</small></div></div>
+ <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.2 beta &copy; LogiSync</span></div></div>`;
+}
+
+function service(){
+ const id=view().slice(2),s=SV.find(x=>x.id===id);
+ if(!s)return `<button class="btn" onclick="location.hash='services'">‹ Services</button><p class="sub" style="margin-top:14px">Service introuvable.</p>`;
+ const P=plan(s),mn=s.driver_id===me.id,p=PR[s.driver_id],now=new Date(),state=now<at(s.day,s.start_time)?'À venir':now<endOf(s)?'En cours':'Terminé';
+ const col=(L.find(x=>x.code===s.line_code)||{}).bg||'var(--ac)',B=(a,t,c)=>`<button class="btn ${c||''}" data-act="${a}" data-id="${esc(s.id)}">${t}</button>`;
+ return `<button class="btn noprint" style="margin-bottom:12px" onclick="location.hash='services'">‹ Services</button>
+ <div class="row" style="justify-content:space-between;align-items:flex-start"><div><div class="row">${lb(s.line_code)}<h1>Service ${esc(s.id)}</h1></div><p class="sub">${esc(dlong(s.day))} · ${esc(P.ta)} ↔ ${esc(P.tb)} · ${p?esc(p.prenom+' '+p.nom):'à pourvoir'} <span class="tag ${state==='En cours'?'ok':''}">${state}</span> <span class="tag ${s.driver_id?'ok':''}">${s.driver_id?'Planifié':'À pourvoir'}</span></p></div>${mn?B('drive','➤ Mode conduite','p'):''}</div>
+ <div class="row" style="margin:0 0 14px">${B('print','🖨 Imprimer / PDF')}${!s.driver_id?B('take','Prendre ce service','p'):mn?B('drop','Rendre mon service'):''}${me.role==='admin'?B('edit','Modifier'):''}</div>
+ <div class="kpi"><div><small>Prise de service</small><b>${ft(P.t0)}</b><span>${esc(DEPOT)}</span></div><div><small>Sortie dépôt</small><b>${ft(P.hlpOut.a)}</b><span>HLP ${HLP_OUT} min</span></div><div><small>1er départ</small><b>${ft(P.first.a)}</b><span>${esc(P.first.from)}</span></div><div><small>Dernière arrivée</small><b>${ft(P.last.b)}</b><span>${P.n} course${P.n>1?'s':''}</span></div><div><small>Fin de service</small><b>${ft(P.t0+P.tot)}</b><span>${esc(DEPOT)}</span></div><div><small>Amplitude</small><b>${dm(P.tot)}</b><span>conduite ${P.cond} min</span></div></div>
+ <div class="sgrid"><div class="card"><h2>Feuille de service</h2><div class="paper">${sheetHTML(s)}</div></div>
+ <div class="card"><h2>Déroulé</h2>${P.st.map(x=>`<div class="st" style="--c:${x.k==='course'?esc(col):'var(--line)'}"><b class="ti">${ft(x.a)}</b><div><b>${esc(x.k==='course'?'Course '+x.n:x.label)}</b>${x.k==='course'?` <span class="bx2">${x.sens}</span>`:''}<br><small class="mu" style="font-size:13px">${esc(x.sub)}</small></div><span class="rt">${ft(x.b)}<br>${x.d?dm(x.d):''}</span></div>`).join('')}</div></div>`;
+}
+function sact(a,id){
+ if(a==='take')act(sb.from('services').update({driver_id:me.id}).eq('id',id).is('driver_id',null));
+ else if(a==='drop')act(sb.from('services').update({driver_id:null}).eq('id',id).eq('driver_id',me.id));
+ else if(a==='edit')svcDlg(id);else if(a==='print')printSheet(id);else if(a==='drive')location.hash='drive-'+id;
+}
+
+const DR={};
+function drs(id){if(!DR[id]){let v=null;try{v=JSON.parse(localStorage.getItem('lr-dr-'+id))}catch(e){}DR[id]=v||{n:0,delay:0,log:[]}}return DR[id]}
+const drsave=id=>{try{localStorage.setItem('lr-dr-'+id,JSON.stringify(DR[id]))}catch(e){}};
+const mv=x=>x&&(x.k==='hlp'||x.k==='course');
+const bigOf=x=>x.k==='prep'?`Prise de service à ${ft(x.a)}`:x.k==='hlp'?`${x.to===DEPOT?'Retour au dépôt':'Sortie du dépôt'} à ${ft(x.a)}`:x.k==='course'?`Départ course ${x.n} à ${ft(x.a)}`:x.k==='batt'?`Battement jusqu’à ${ft(x.b)}`:`Fin de service à ${ft(x.a)}`;
+const btnOf=x=>x.k==='prep'?'Prise de service':x.k==='hlp'?(x.to===DEPOT?'Retour au dépôt':'Sortie du dépôt'):x.k==='course'?`Départ course ${x.n}`:x.k==='batt'?'Début du battement':'Fin de service';
+function dstate(s,P,D){
+ const nowS=(Date.now()-at(s.day,'00:00').getTime())/1000,nowM=nowS/60,cur=P.st[D.n]||null,prev=D.n>0?P.st[D.n-1]:null;
+ const pan=mv(prev)?prev:(P.st.slice(D.n).find(mv)||null);
+ let idx=0;if(pan&&pan===prev)pan.stops.forEach((q,i)=>{if(q.t<=nowM)idx=i});
+ let txt='',lbl='';
+ if(cur){const x=cur.a*60-nowS,a=Math.abs(Math.round(x)),h=Math.floor(a/3600),m=Math.floor(a%3600/60);txt=(x<0?'+':'')+(h?h+':':'')+String(m).padStart(2,'0')+':'+String(a%60).padStart(2,'0');lbl=x<0?'de retard : '+btnOf(cur).toLowerCase():'avant : '+btnOf(cur).toLowerCase()}
+ return{nowM,cur,prev,pan,idx,txt,lbl};
+}
+function drive(){
+ const id=view().slice(6),s=SV.find(x=>x.id===id);
+ if(!s||s.driver_id!==me.id)return `<div class="dv" style="display:flex;align-items:center;justify-content:center;text-align:center"><div><p class="sub">Ce service n’est pas dans tes services.</p><a class="btn" href="#services">Retour aux services</a></div></div>`;
+ const P=plan(s),D=drs(id),S=dstate(s,P,D),done=D.n>=P.st.length,dl=D.delay,cls=dl>1?'late':dl<-1?'early':'ok',pan=S.pan;
+ const left=pan?`<div class="dh">${pan.k==='hlp'?'<span class="hb">HLP</span>':lb(s.line_code)}<div><small class="mu">${pan.k==='hlp'?'Haut-le-pied':'Course '+pan.n+' · '+pan.sens} · ${esc(pan.from)} →</small><br><b style="font-size:22px">${esc(pan.to)}</b></div></div>`+pan.stops.map((q,i)=>({q,i})).reverse().map(({q,i})=>`<div class="sp ${i===S.idx?'cur':''}"><i></i><div><b>${esc(q.name)}</b>${i===0?'<small>Départ</small>':i===pan.stops.length-1?'<small>Terminus</small>':''}</div><span>${ft(q.t)}</span></div>`).join(''):`<div class="dh"><b style="font-size:20px">Aucun trajet en cours</b></div>`;
+ const right=`<div class="dtop"><div class="pn ${cls}"><b>${cls==='ok'?'À l’heure':cls==='late'?'En retard':'En avance'}</b>${dl<0?'−':'+'}${Math.abs(dl)} min</div><div class="dc"><b id="dvclk">${new Date().toLocaleTimeString('fr-FR')}</b><small>Heure locale</small></div></div>
+ <div class="dn2"><span style="font-size:36px">🏠</span><div class="g"><small class="mu">${S.prev?esc(S.prev.label)+' à '+ft(S.prev.a)+(S.prev.k==='prep'?' au dépôt':''):'Début de service'}</small><br><b>${done?'Service terminé':esc(bigOf(S.cur))}</b></div><div class="cdv"><b id="dvcd">${done?'':S.txt}</b><small id="dvcdl" class="mu">${done?'':esc(S.lbl)}</small></div></div>
+ <button class="big" id="dvgo">${done?'Quitter le mode conduite':esc(btnOf(S.cur))}</button>
+ <div class="chips"><span>Service ${esc(s.id)}</span><span>Fin de service ${ft(P.t0+P.tot)}</span></div>
+ <div class="dd"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="margin:0">Déroulé du service</h2><span class="mu">Espace ou Entrée : valider l’étape</span></div>${P.st.map((x,i)=>`<div class="di ${i<D.n?'done':i===D.n?'now':''}"><div><b>${esc(x.k==='course'?`Course ${x.n} · ${x.from} → ${x.to}`:x.k==='hlp'?`Haut-le-pied · ${x.from} → ${x.to}`:x.label)}</b><small>${x.k==='prep'?'checklist':x.k==='fin'?'arrivée au dépôt':x.k==='batt'?'au terminus':x.k==='course'?(x.sens==='A'?'aller':'retour'):'trajet à vide'}</small></div><span class="t">${i<D.n?'✓ ':''}${x.k==='prep'||x.k==='fin'?ft(x.a):ft(x.a)+' → '+ft(x.b)}</span></div>`).join('')}</div>`;
+ return `<div class="dv"><div class="dr"><button class="rb on" title="Conduite">➤</button><a class="rb" href="#messages" title="Messages">✉</a><button class="rb" id="dvreset" title="Recommencer le déroulé">↺</button><button class="rb x" id="dvquit" title="Quitter" style="margin-top:auto">✕</button></div><div class="dl" data-idx="${S.idx}">${left}</div><div class="dm">${right}</div></div>`;
+}
+function dvalid(){
+ const id=view().slice(6),s=SV.find(x=>x.id===id);if(!s)return;
+ const P=plan(s),D=drs(id);
+ if(D.n>=P.st.length){location.hash='s-'+id;return}
+ const x=P.st[D.n],nowM=(Date.now()-at(s.day,'00:00').getTime())/60000;
+ D.delay=Math.round(nowM-x.a);D.log.push({i:D.n,m:Math.round(nowM)});D.n++;drsave(id);driveRender();
+ if(D.n>=P.st.length)toast('Service terminé. Bonne fin de journée !',1);
+}
+function driveRender(){$('#app').innerHTML=drive();bindDrive()}
+function bindDrive(){
+ const g=$('#dvgo');if(g)g.onclick=dvalid;
+ const q=$('#dvquit');if(q)q.onclick=()=>{location.hash='s-'+view().slice(6)};
+ const r=$('#dvreset');if(r)r.onclick=()=>{
+  if(!r.dataset.c){r.dataset.c='1';r.textContent='?';toast('Clique encore pour recommencer le déroulé.');setTimeout(()=>{r.dataset.c='';r.textContent='↺'},4000);return}
+  const id=view().slice(6);DR[id]={n:0,delay:0,log:[]};drsave(id);driveRender();
+ };
+}
+function driveTick(){
+ const id=view().slice(6),s=SV.find(x=>x.id===id);if(!s||s.driver_id!==me.id)return;
+ const P=plan(s),D=drs(id),S=dstate(s,P,D),c=$('#dvclk');
+ if(c)c.textContent=new Date().toLocaleTimeString('fr-FR');
+ const el=$('.dl');if(el&&+el.dataset.idx!==S.idx){driveRender();return}
+ const cd=$('#dvcd'),cl=$('#dvcdl');if(cd&&cl&&S.cur){cd.textContent=S.txt;cl.textContent=S.lbl}
 }
 
 function admin(){
  let b;const npend=Object.values(PR).filter(p=>!p.approved).length;
- if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
+ if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires · course ${trj(x)[0]} min · repos ${trj(x)[1]} min</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
  else if(adm==='services')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length} services</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+SV.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('');
  else if(adm==='pending'){const w=Object.values(PR).filter(p=>!p.approved);b=w.length?w.map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>Matricule : ${esc(p.matricule)}</small></div><button class="btn p" data-ok="${p.id}">Valider</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Refuser</button></div>`).join(''):'<p class="sub">Aucun compte en attente.</p>'}
  else b=Object.values(PR).filter(p=>p.approved).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Supprimer</button>`}</div>`).join('');
@@ -265,13 +424,15 @@ function admin(){
 function lineDlg(code){
  const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:''};
  const names=code?ST.filter(s=>s.line_code===code).map(s=>s.name).join('\n'):'';
- dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><div class="two"><label>Durée d’une course (min)<input id="l7" type="number" min="1" value="${trj(x)[0]}" style="width:100%"></label><label>Repos au terminus (min)<input id="l8" type="number" min="0" value="${trj(x)[1]}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
  const er=m=>$('#le').textContent=m;
  $('#lf').onsubmit=async e=>{e.preventDefault();
   const c=$('#l1').value.replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
   if(!c)return er('Saisis un code de ligne.');
   if(c!==code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
-  const o={code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim()};
+  const cm=parseInt($('#l7').value),rm=parseInt($('#l8').value);
+  if(!(cm>=1)||!(rm>=0))return er('Saisis une durée de course (1 min minimum) et un repos (0 min minimum).');
+  const o={code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim(),course_min:cm,repos_min:rm};
   let r=await(code&&c!==code?sb.from('lines').update(o).eq('code',code):sb.from('lines').upsert(o));
   if(r.error)return er(r.error.message);
   r=await sb.from('stops').delete().eq('line_code',c);if(r.error)return er(r.error.message);
@@ -297,18 +458,7 @@ function svcDlg(id){
  const d=$('#sd');if(d)twice(d,async()=>{if(await act(sb.from('services').delete().eq('id',id)))close()});
 }
 
-function sheet(id){
- const s=SV.find(x=>x.id===id);if(!s)return false;
- const l=L.find(x=>x.code===s.line_code)||{},pts=[l.terminus_a,...ST.filter(x=>x.line_code===s.line_code).map(x=>x.name),l.terminus_b].filter(Boolean),p=PR[s.driver_id]||me;
- const jour=new Date(s.day+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- $('#sheet').innerHTML=`<div class="sh"><div class="shh"><div><h1>LogiRide · Trans'Cab</h1><p>Feuille de service</p></div><div class="shn"><small>SERVICE</small><b>${esc(s.id)}</b></div></div>
- <div class="shg"><div><small>Ligne</small>${lb(s.line_code)}</div><div><small>Jour</small><b>${esc(jour)}</b></div><div><small>Conducteur</small><b>${esc((p.prenom||'')+' '+(p.nom||''))}</b><br>${esc(p.matricule||'')}</div><div><small>N° de voiture</small></div></div>
- <div class="shg"><div><small>Prise de service</small><b>${hm(s.start_time)}</b></div><div><small>Fin de service</small><b>${hm(s.end_time)}</b></div><div><small>Amplitude</small><b>${amp(s.start_time,s.end_time)}</b></div><div><small>Détail</small><b>${esc(s.detail||'')}</b></div></div>
- <table><thead><tr><th style="width:40px">N°</th><th>Arrêt</th><th style="width:160px">Position</th></tr></thead><tbody>${pts.length?pts.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x)}</td><td>${i===0?'Terminus de départ':i===pts.length-1?'Terminus d’arrivée':''}</td></tr>`).join(''):'<tr><td colspan="3">Aucun arrêt défini pour cette ligne.</td></tr>'}</tbody></table>
- <div class="shs"><div><small>Observations</small></div><div><small>Signature du conducteur</small></div><div><small>Visa régulation</small></div></div>
- <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.2 beta &copy; LogiSync</span></div></div>`;
- return true;
-}
+function sheet(id){const s=SV.find(x=>x.id===id);if(!s)return false;$('#sheet').innerHTML=sheetHTML(s);return true}
 function printSheet(id){if($('#dlg').open)close();if(!sheet(id))return;document.body.classList.add('ps');setTimeout(()=>window.print(),60)}
 function pendingView(){
  document.body.classList.remove('in');$('#nav').style.display='none';
@@ -326,15 +476,17 @@ function render(){
  if(!me.approved){pendingView();return}
  const r=view();
  if(r==='quitter'){me=null;sb.auth.signOut().then(()=>{location.hash='journee';render()});return}
- const v=NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil'?r:'journee';
- nav(v);$('#app').innerHTML=({journee,services,planning,heures,messages,admin,profil})[v]();
- $('#app').insertAdjacentHTML('beforeend',FOOT);
+ const v=r.startsWith('s-')?'service':r.startsWith('drive-')?'drive':(NAV.some(n=>n[0]===r)||(r==='admin'&&me.role==='admin')||r==='profil')?r:'journee';
+ nav(v==='service'||v==='drive'?'services':v);$('#app').innerHTML=({journee,services,planning,heures,messages,admin,profil,service,drive})[v]();
+ if(v!=='drive')$('#app').insertAdjacentHTML('beforeend',FOOT);
  document.querySelectorAll('.sv[data-id],.chip[data-id],.js[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;render()});
  document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{pmo+=+b.dataset.mp;render()});
  document.querySelectorAll('[data-mh]').forEach(b=>b.onclick=()=>{hmo+=+b.dataset.mh;render()});
  document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=e=>{e.stopPropagation();printSheet(b.dataset.pr)});
+ document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>sact(b.dataset.act,b.dataset.id));
+ if(v==='drive')bindDrive();
  const cb=$('#csv');if(cb)cb.onclick=csv;const pb=$('#prt');if(pb)pb.onclick=()=>window.print();
  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({role:b.dataset.to}).eq('id',b.dataset.role)));
  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>act(sb.from('profiles').update({approved:true}).eq('id',b.dataset.ok)));
@@ -349,11 +501,13 @@ function render(){
 let tk=0;
 function tick(){
  const n=new Date(),t=n.toLocaleTimeString('fr-FR'),c=$('#clock');
+ if(me&&me.approved&&view().startsWith('drive-'))driveTick();
  if(c)c.innerHTML='<b>'+t.slice(0,5)+'<i style="font-size:17px;font-weight:600;color:var(--mu);font-style:normal">'+t.slice(5)+'</i></b><span>'+n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</span>';
  tk++;if(me&&!me.approved&&tk%30===0)enter(me.id);
  if(tk%60===0&&me&&['journee','services','planning','heures','profil'].includes(view())&&!$('#dlg').open&&!document.activeElement.matches('input,select,textarea'))render();
 }
 tick();setInterval(tick,1000);
+document.addEventListener('keydown',e=>{if(me&&view().startsWith('drive-')&&e.target===document.body&&(e.key===' '||e.key==='Enter')){e.preventDefault();dvalid()}});
 window.addEventListener('afterprint',()=>document.body.classList.remove('ps'));
 window.addEventListener('hashchange',render);
 sb.auth.getSession().then(({data})=>data.session?enter(data.session.user.id):render());
