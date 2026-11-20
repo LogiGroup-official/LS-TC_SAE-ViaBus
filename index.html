@@ -371,11 +371,10 @@ function heures(){
 }
 function equipe(){
  const d=mstart(omo),y=d.getFullYear(),m=d.getMonth(),n=new Date(y,m+1,0).getDate(),off=(d.getDay()+6)%7,c=[];
- const drivers=Object.values(PR).filter(p=>p.approved&&p.role==='driver'&&p.id!==me.id);
  for(let i=0;i<off;i++)c.push('<div></div>');
  for(let k=1;k<=n;k++){
   const dt=iso(new Date(y,m,k));
-  const dayServices=SV.filter(s=>s.day===dt&&s.driver_id&&s.driver_id!==me.id&&PR[s.driver_id]?.approved&&PR[s.driver_id]?.role==='driver')
+  const dayServices=SV.filter(s=>s.day===dt&&s.driver_id&&PR[s.driver_id]?.approved&&(PR[s.driver_id]?.role==='driver'||PR[s.driver_id]?.role==='admin'))
    .sort((a,b)=>a.start_time.localeCompare(b.start_time));
   const byDriver=new Map();
   dayServices.forEach(s=>{if(!byDriver.has(s.driver_id))byDriver.set(s.driver_id,[]);byDriver.get(s.driver_id).push(s)});
@@ -385,12 +384,12 @@ function equipe(){
   }).join('');
   c.push(`<div class="day ${dt===today()?'td':''}"><div class="dn">${k}</div>${blocks||'<span class="mu">—</span>'}</div>`);
  }
- const monthTotal=SV.filter(s=>s.driver_id&&s.driver_id!==me.id&&PR[s.driver_id]?.approved&&PR[s.driver_id]?.role==='driver'&&new Date(s.day+'T12:00').getFullYear()===y&&new Date(s.day+'T12:00').getMonth()===m).length;
- return `<h1>Planning de l’équipe</h1><p class="sub">Services prévus des autres conducteurs pour le mois sélectionné. Sélectionne un service pour ouvrir sa fiche.</p><div class="row" style="justify-content:space-between;margin-bottom:12px">${mnav('mo',omo)}<span class="mu">${monthTotal} service(s) planifié(s)</span></div><div class="card scr"><div class="cal">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<div class="h">${x}</div>`).join('')}${c.join('')}</div></div><p class="mu">Les services sans conducteur attribué ne sont pas affichés. Ton propre planning reste dans « Planning ».</p>`;
+ const monthTotal=SV.filter(s=>s.driver_id&&PR[s.driver_id]?.approved&&(PR[s.driver_id]?.role==='driver'||PR[s.driver_id]?.role==='admin')&&new Date(s.day+'T12:00').getFullYear()===y&&new Date(s.day+'T12:00').getMonth()===m).length;
+ return `<h1>Planning de l’équipe</h1><p class="sub">Services prévus de toute l’équipe pour le mois sélectionné. Sélectionne un service pour ouvrir sa fiche.</p><div class="row" style="justify-content:space-between;margin-bottom:12px">${mnav('mo',omo)}<span class="mu">${monthTotal} service(s) planifié(s)</span></div><div class="card scr"><div class="cal">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<div class="h">${x}</div>`).join('')}${c.join('')}</div></div><p class="mu">Les services sans conducteur attribué ne sont pas affichés. Les services des administrateurs ayant une vacation attribuée sont également affichés.</p>`;
 }
 function classement(){
  const d=mstart(rmo),y=d.getFullYear(),m=d.getMonth();
- const drivers=Object.values(PR).filter(p=>p.approved&&(p.role==='driver'||p.id===me.id));
+ const drivers=Object.values(PR).filter(p=>p.approved&&(p.role==='driver'||p.role==='admin'));
  const scores=drivers.map(p=>{
   const services=SV.filter(s=>s.driver_id===p.id&&new Date(s.day+'T12:00').getFullYear()===y&&new Date(s.day+'T12:00').getMonth()===m);
   const minutes=services.reduce((sum,s)=>sum+plan(s).cond,0);
