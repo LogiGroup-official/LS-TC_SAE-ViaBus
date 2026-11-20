@@ -211,7 +211,7 @@ function authView(){
 function nav(v){
  const a=[...NAV];if(me.role==='admin')a.push(['admin','⚙','Admin']);a.push(['profil','☺','Profil']);a.push(['quitter','⎋','Quitter']);
  $('#nav').style.display='';document.body.classList.add('in');
- $('#nav').innerHTML='<div class="lg">V0.2b</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
+ $('#nav').innerHTML='<div class="lg">LogiRide</div>'+a.map(([k,i,t])=>`<a tabindex="0" role="link" data-r="${k}" class="${v===k?'on':''}"><b>${i}</b>${t}</a>`).join('');
  document.querySelectorAll('nav a').forEach(x=>{x.onclick=()=>location.hash=x.dataset.r;x.onkeydown=e=>{if(e.key==='Enter')x.click()}});
 }
 function row(s,pr){const p=!!s.driver_id;return `<div class="sv" tabindex="0" data-id="${esc(s.id)}">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${esc(s.detail)} · amplitude ${amp(s.start_time,s.end_time)}</small></div><span class="tm">${hm(s.start_time)} – ${hm(s.end_time)}</span>${pr?`<button class="btn" data-pr="${esc(s.id)}" style="padding:4px 10px;font-size:13px">🖨 Imprimer</button>`:''}<span class="tag ${p?'ok':''}">${p?'Planifié':'À pourvoir'}</span></div>`}
