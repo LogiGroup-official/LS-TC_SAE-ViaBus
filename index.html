@@ -286,7 +286,7 @@ function messages(){
 }
 
 function detail(id){location.hash='s-'+id}
-const DEPOT='Dépôt des Aliziers - Lencorne',PREP=2,HLP_OUT=3,HLP_IN=5,FIN=0;
+const DEPOT='Dépôt LS',PREP=2,HLP_OUT=3,HLP_IN=5,FIN=0;
 // Temps de trajet par ligne : [durée d'une course (aller ou retour), repos au terminus] en minutes
 const trj=l=>{const T=TRAJ[String(l.code).toUpperCase()]||[10,5];return[Number.isInteger(l.course_min)&&l.course_min>0?l.course_min:T[0],Number.isInteger(l.repos_min)&&l.repos_min>=0?l.repos_min:T[1]]};
 const TRAJ={A:[10,5],B:[10,5],C:[6,5],D:[8,5],E:[15,5],NT1:[10,5],NT2:[10,5],NT3:[6,5],NT4:[8,5],NT5:[15,5]};
