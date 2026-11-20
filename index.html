@@ -14,7 +14,7 @@ nav .sheet{display:contents}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh;padding-top:env(safe-area-inset-top,0px)}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(46,26,71,.78),rgba(46,26,71,.88)),url('fond.jpg') center/cover no-repeat}
-nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;position:sticky;top:0;height:100vh}
+nav{width:84px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:54px 0 14px;position:sticky;top:0;height:100vh}
 nav a{width:68px;padding:9px 0;border-radius:12px;text-align:center;color:var(--mu);font-size:12px;cursor:pointer}
 nav a b{display:block;font-size:20px;font-weight:400}nav a.on{background:var(--ac);color:var(--acx)}
 nav .lg{height:36px;font-size:0;margin-bottom:10px}
@@ -75,7 +75,7 @@ dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);borde
 dialog::backdrop{background:rgba(0,0,0,.6)}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--rd);color:#2b0a10;padding:10px 16px;border-radius:10px;font-weight:600;display:none;z-index:30;max-width:90vw}
 #logo{position:fixed;top:5px;left:10px;width:146px;height:56px;object-fit:contain;z-index:6}
-body.in #logo{left:8px;top:6px;width:68px;height:48px}
+body.in #logo{left:42px;top:8px;width:42px;height:34px;transform:translateX(-50%)}
 #clock{position:fixed;top:10px;right:20px;text-align:right;line-height:1.1;z-index:4;pointer-events:none;font-variant-numeric:tabular-nums;background:var(--side);border:1px solid var(--line);border-radius:14px;padding:8px 16px}
 #clock b{display:block;font-size:36px;font-weight:800}#clock span{font-size:13px;color:var(--mu)}
 @media(max-width:1000px){.kpi{grid-template-columns:repeat(3,1fr)}.kpi div:nth-child(4){border-left:0}.hgrid{grid-template-columns:1fr}}
@@ -90,7 +90,7 @@ nav .more b{font-size:22px;font-weight:400}nav .more.on{background:var(--ac);col
 nav .sheet{display:none;position:fixed;left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--side);border:1px solid var(--line);border-radius:16px;padding:10px;grid-template-columns:repeat(3,1fr);gap:6px;z-index:6;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 nav.open .sheet{display:grid}
 nav .sheet a{flex:none;font-size:12px;padding:12px 0}
- nav .lg{display:none}main{padding:44px 14px 100px}.grid{grid-template-columns:1fr}#clock{top:8px;right:12px;padding:4px 10px}body.in::after{display:none}#logo,body.in #logo{width:90px;height:30px;top:8px;left:10px}#clock b{font-size:22px}#clock span{display:none}.kpi{grid-template-columns:repeat(2,1fr)}.kpi div{border-left:0;border-top:1px solid var(--line)}}
+ nav .lg{display:none}main{padding:44px 14px 100px}.grid{grid-template-columns:1fr}#clock{top:8px;right:12px;padding:4px 10px}body.in::after{display:none}#logo,body.in #logo{width:90px;height:30px;top:8px;left:10px;transform:none}#clock b{font-size:22px}#clock span{display:none}.kpi{grid-template-columns:repeat(2,1fr)}.kpi div{border-left:0;border-top:1px solid var(--line)}}
 @media(min-width:761px) and (max-width:1560px){main{padding-top:76px}}
 #sheet{display:none;width:100%}
 .sh{font-family:"Segoe UI",system-ui,sans-serif;color:#000;background:#fff;padding:4mm}
@@ -150,6 +150,48 @@ nav .sheet a{flex:none;font-size:12px;padding:12px 0}
 .di>div{flex:1;min-width:0}.di small{display:block;color:var(--mu)}.di .t{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media(max-width:1000px){.sgrid{grid-template-columns:1fr}}
 @media(max-width:900px){.dv{grid-template-columns:64px 1fr}.dl{display:none}.dtop{grid-template-columns:1fr}.rb{width:48px;height:48px}}
+/* Feuille de service : mise en page compacte sur téléphone */
+@media(max-width:600px){
+ main{padding-left:8px;padding-right:8px}
+ .sgrid{grid-template-columns:minmax(0,1fr);gap:10px}
+ .sgrid>.card{padding:8px;min-width:0}
+ .paper{width:100%;max-width:100%;min-width:0;padding:4px;border-radius:5px;overflow-x:auto}
+ .sh{padding:2mm;min-width:0}
+ .sh h1{font-size:15px;line-height:1.2}
+ .sh p{font-size:9px}
+ .shh{padding-bottom:5px;margin-bottom:6px;gap:5px}
+ .shn{border-width:2px;padding:3px 6px;white-space:nowrap}
+ .shn small{font-size:7px}.shn b{font-size:17px}
+ .shg,.shg5{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:6px}
+ .shg div{padding:4px 5px;min-height:0;border-top:1px solid #000;font-size:10px}
+ .shg div:nth-child(odd){border-left:0}
+ .shg div:nth-child(-n+2){border-top:0}
+ .shg small,.shs small{font-size:7px;letter-spacing:.04em}
+ .shg b{font-size:10px;overflow-wrap:anywhere}
+ .shk{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:7px}
+ .shk div{padding:4px;min-height:0;border-left:1px solid #000;border-top:1px solid #000}
+ .shk div:nth-child(3n+1){border-left:0}
+ .shk div:nth-child(-n+3){border-top:0}
+ .shk small{font-size:7px;letter-spacing:0}
+ .shk b{font-size:11px}.shk i{font-size:7px}
+ .sht{font-size:8px;letter-spacing:.07em;margin:6px 0 3px;gap:4px}
+ .sht span{font-size:7px;text-align:right}
+ .shbar{height:10px;margin:3px 0}
+ .shlg{gap:5px 8px;flex-wrap:wrap;font-size:7px;margin-bottom:6px}
+ .shlg i{width:7px;height:7px;margin-right:2px}
+ .sh table{table-layout:fixed;width:100%;margin-bottom:7px}
+ .sh th,.sh td{padding:2px;font-size:7px;overflow-wrap:anywhere;word-break:break-word}
+ .sh th{font-size:6px;letter-spacing:0}
+ .sh td.sn{width:22px}
+ .sh .bx{font-size:7px;padding:0 2px}
+ .shs{grid-template-columns:2fr 1fr 1fr;min-height:65px}
+ .shs div{padding:4px}
+ .shf{font-size:7px;gap:4px;flex-wrap:wrap}
+ .paper{box-shadow:0 2px 8px rgba(0,0,0,.25)}
+ .kpi{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:10px}
+ .kpi div{padding:7px 8px}
+ .kpi b{font-size:18px}
+}
 @page{size:A4;margin:10mm}
 @media print{:root{--bg:#fff;--card:#fff;--side:#fff;--tx:#000;--mu:#444;--line:#999}nav,#clock,#toast,.noprint{display:none!important}body::before{display:none}.sh,.sh *{-webkit-print-color-adjust:exact;print-color-adjust:exact}body.ps>*:not(#sheet){display:none!important}body.ps #sheet{display:block}}
 </style>
