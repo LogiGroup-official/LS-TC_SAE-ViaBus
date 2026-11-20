@@ -147,7 +147,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
 const $=s=>document.querySelector(s);
-const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.2 beta &copy; LogiSync</p>';
+const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.3 beta &copy;LogiSync</p>';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0,svcPage=0,serviceSyncTimer=null;
 const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['heures','◷','Mes heures'],['messages','✉','Messages']];
@@ -372,7 +372,7 @@ function sheetHTML(s){
  <table><thead><tr><th>Début</th><th>Fin</th><th>Activité</th><th>Sens</th><th>Origine</th><th>Destination</th><th>Durée</th></tr></thead><tbody>${P.st.map(x=>`<tr><td>${ft(x.a)}</td><td>${ft(x.b)}</td><td><b>${esc(x.label)}</b> ${x.k==='course'?'':esc(x.sub)}</td><td class="sn">${x.k==='course'?`<span class="bx">${x.sens}</span>`:''}</td><td>${esc(x.from)}</td><td>${esc(x.to)}</td><td>${hh(x.d)}</td></tr>`).join('')}</tbody></table>
  <div class="sht">Horaires de passage<span>horaires théoriques</span></div>${grp('A')}${grp('R')}
  <div class="shs" style="margin-top:12px"><div><small>Observations</small></div><div><small>Signature du conducteur</small></div><div><small>Visa régulation</small></div></div>
- <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.2 beta &copy; LogiSync</span></div></div>`;
+ <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.3 beta &copy;LogiSync</span></div></div>`;
 }
 
 function service(){
