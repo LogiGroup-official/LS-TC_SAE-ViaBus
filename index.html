@@ -207,9 +207,9 @@ nav .sheet a{flex:none;font-size:12px;padding:12px 0}
 <script>
 const sb=supabase.createClient('https://joubhbfkankatgybkixq.supabase.co','sb_publishable_obT3TbD0d81BWWxGOlOmXw_h_ZUhLY9');
 const $=s=>document.querySelector(s);
-const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 0.3 beta &copy;LogiSync</p>';
+const FOOT='<p class="sub" style="font-size:12px;margin:24px 0 0;text-align:center">LogiRide version 1.0 &copy;LogiSync</p>';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0,omo=0,rmo=0,svcPage=0,serviceSyncTimer=null;
+let me=null,L=[],ST=[],SV=[],MG=[],PR={},VEH=[],HAB=[],tab='mine',fl='Toutes',adm='lines',amode='login',live=false,pmo=0,hmo=0,omo=0,rmo=0,svcPage=0,serviceSyncTimer=null;
 const NAV=[['journee','▦','Journée'],['services','🚌','Services'],['planning','▤','Planning'],['heures','◷','Mes heures'],['equipe','👥','Équipe'],['classement','🏆','Classement'],['messages','✉','Messages']];
 const view=()=>(location.hash||'#journee').slice(1);
 const hm=t=>(t||'').slice(0,5);
@@ -253,9 +253,9 @@ async function allServices(){
  return {data:all.filter(Boolean),error:null};
 }
 async function load(){
- const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),allServices(),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role,approved'),sb.from('vehicles').select('*').order('fleet_number')]);
+ const r=await Promise.all([sb.from('lines').select('*').order('code'),sb.from('stops').select('*').order('pos'),allServices(),sb.from('messages').select('*').order('created_at').limit(100),sb.from('profiles').select('id,prenom,nom,matricule,role,approved'),sb.from('vehicles').select('*').order('fleet_number'),sb.from('line_authorizations').select('driver_id,line_code')]);
  const e=r.find(x=>x.error);if(e)toast(e.error.message);
- L=r[0].data||[];ST=r[1].data||[];SV=r[2].data||[];MG=r[3].data||[];PR=Object.fromEntries((r[4].data||[]).map(p=>[p.id,p]));VEH=r[5].data||[];
+ L=r[0].data||[];ST=r[1].data||[];SV=r[2].data||[];MG=r[3].data||[];PR=Object.fromEntries((r[4].data||[]).map(p=>[p.id,p]));VEH=r[5].data||[];HAB=r[6].data||[];
 }
 async function enter(id){
  let{data}=await sb.from('profiles').select('*').eq('id',id).maybeSingle();
@@ -415,6 +415,9 @@ const DEPOT='Dépôt LS',PREP=2,HLP_OUT=3,HLP_IN=5,FIN=0;
 // Temps de trajet par ligne : [durée d'une course (aller ou retour), repos au terminus] en minutes
 const trj=l=>{const T=TRAJ[String(l.code).toUpperCase()]||[10,5];return[Number.isInteger(l.course_min)&&l.course_min>0?l.course_min:T[0],Number.isInteger(l.repos_min)&&l.repos_min>=0?l.repos_min:T[1]]};
 const TRAJ={A:[10,5],B:[10,5],C:[6,5],D:[8,5],E:[15,5],NT1:[10,5],NT2:[10,5],NT3:[6,5],NT4:[8,5],NT5:[15,5]};
+const authorized=(id,code)=>{const p=PR[id]||(me&&me.id===id?me:null);return !!p&&(p.role==='admin'||HAB.some(a=>a.driver_id===id&&a.line_code===code))};
+const routeInfo=code=>{const l=L.find(x=>x.code===code)||{},stops=ST.filter(x=>x.line_code===code).sort((a,b)=>a.pos-b.pos),segs=stops.map(x=>Number(x.travel_min)),last=Number(l.terminal_travel_min),complete=Number.isInteger(last)&&last>0&&segs.every(x=>Number.isInteger(x)&&x>0);return{l,stops,segs:complete?[...segs,last]:null,complete}};
+const courseStops=(code,sens,start)=>{const r=routeInfo(code),l=r.l,ta=l.terminus_a||'Terminus A',tb=l.terminus_b||'Terminus B',pts=[ta,...r.stops.map(x=>x.name),tb],fallback=trj({code,course_min:l.course_min})[0];let seg=r.complete?r.segs:Array.from({length:pts.length-1},()=>fallback/Math.max(1,pts.length-1));if(sens==='R')seg=[...seg].reverse();const route=sens==='A'?pts:[...pts].reverse(),out=[{name:route[0],t:start}];let t=start;seg.forEach((d,i)=>{t+=d;out.push({name:route[i+1],t:Math.round(t)})});return{stops:out,duration:r.complete?r.segs.reduce((a,b)=>a+b,0):fallback}};
 const ft=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 const dm=d=>d<60?d+' min':Math.floor(d/60)+' h '+String(d%60).padStart(2,'0');
 const hh=d=>Math.floor(d/60)+':'+String(d%60).padStart(2,'0');
@@ -423,7 +426,7 @@ const dlong=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',d
 function plan(s){
  const l=L.find(x=>x.code===s.line_code)||{},ta=l.terminus_a||'Terminus A',tb=l.terminus_b||'Terminus B';
  const pts=[ta,...ST.filter(x=>x.line_code===s.line_code).map(x=>x.name),tb];
- const[cd,bt]=trj({code:s.line_code,course_min:l.course_min,repos_min:l.repos_min});
+ const base=trj({code:s.line_code,course_min:l.course_min,repos_min:l.repos_min}),ri=routeInfo(s.line_code),cd=ri.complete?ri.segs.reduce((a,b)=>a+b,0):base[0],bt=base[1];
  const t0=tmin(s.start_time),tot=dur(s)||1440,A=tot-PREP-HLP_OUT-HLP_IN-FIN;
  const n=Math.max(1,Math.floor((A+bt)/(cd+bt))),extra=Math.max(0,A-(n*cd+(n-1)*bt));
  const st=[];let t=t0;
@@ -431,8 +434,8 @@ function plan(s){
  add({k:'prep',label:'Prise de service',sub:'Préparation du véhicule',from:DEPOT,to:DEPOT},PREP);
  add({k:'hlp',label:'Haut-le-pied',sub:`${DEPOT} → ${ta}`,from:DEPOT,to:ta},HLP_OUT);
  for(let i=1;i<=n;i++){
-  const sens=i%2?'A':'R',pp=sens==='A'?pts:[...pts].reverse(),a=t,e=pp[pp.length-1];
-  add({k:'course',n:i,sens,label:`Course ${i}`,from:pp[0],to:e,sub:`${pp[0]} → ${e}`,stops:pp.map((nm,j)=>({name:nm,t:a+Math.round(j*cd/Math.max(1,pp.length-1))}))},cd);
+  const sens=i%2?'A':'R',pp=sens==='A'?pts:[...pts].reverse(),e=pp[pp.length-1],route=courseStops(s.line_code,sens,t);
+  add({k:'course',n:i,sens,label:`Course ${i}`,from:pp[0],to:e,sub:`${pp[0]} → ${e}`,stops:route.stops},route.duration);
   if(i<n)add({k:'batt',label:'Battement',sub:'au terminus',from:e,to:e},bt);
  }
  const lt=st[st.length-1].to;
@@ -465,7 +468,7 @@ function sheetHTML(s){
  <table><thead><tr><th>Début</th><th>Fin</th><th>Activité</th><th>Sens</th><th>Origine</th><th>Destination</th><th>Durée</th></tr></thead><tbody>${P.st.map(x=>`<tr><td>${ft(x.a)}</td><td>${ft(x.b)}</td><td><b>${esc(x.label)}</b> ${x.k==='course'?'':esc(x.sub)}</td><td class="sn">${x.k==='course'?`<span class="bx">${x.sens}</span>`:''}</td><td>${esc(x.from)}</td><td>${esc(x.to)}</td><td>${hh(x.d)}</td></tr>`).join('')}</tbody></table>
  <div class="sht">Horaires de passage<span>horaires théoriques</span></div>${grp('A')}${grp('R')}
  <div class="shs" style="margin-top:12px"><div><small>Observations</small></div><div><small>Signature du conducteur</small></div><div><small>Visa régulation</small></div></div>
- <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 0.3 beta &copy;LogiSync</span></div></div>`;
+ <div class="shf"><span>Édité le ${new Date().toLocaleString('fr-FR')} · Ligne ${esc(s.line_code)} · Service ${esc(s.id)}</span><span>LogiRide version 1.0 &copy;LogiSync</span></div></div>`;
 }
 
 function service(){
@@ -486,16 +489,17 @@ function sact(a,id){
  else if(a==='edit')svcDlg(id);else if(a==='print')printSheet(id);else if(a==='drive')location.hash='drive-'+id;
 }
 
-const DR={};
-function drs(id){if(!DR[id]){let v=null;try{v=JSON.parse(localStorage.getItem('lr-dr-'+id))}catch(e){}DR[id]=v||{n:0,delay:0,log:[]}}return DR[id]}
-const drsave=id=>{try{localStorage.setItem('lr-dr-'+id,JSON.stringify(DR[id]))}catch(e){}};
+const DR={},DRREADY={};
+function drs(id){return DR[id]||(DR[id]={n:0,delay:0,log:[]})}
+async function loadDriveProgress(id){if(DRREADY[id])return;DRREADY[id]=true;const r=await sb.from('service_progress').select('step_index,stop_index').eq('service_id',id).maybeSingle();if(r.error){DRREADY[id]=false;toast(r.error.message);return}if(r.data)DR[id]={n:r.data.step_index,delay:0,log:[],stop:r.data.stop_index};else DR[id]={n:0,delay:0,log:[],stop:0};driveRender()}
+const drsave=async id=>{const d=drs(id);const r=await sb.rpc('tc_set_service_progress',{p_service_id:id,p_step_index:d.n,p_stop_index:d.stop||0});if(r.error)toast(r.error.message)};
 const mv=x=>x&&(x.k==='hlp'||x.k==='course');
 const bigOf=x=>x.k==='prep'?`Prise de service à ${ft(x.a)}`:x.k==='hlp'?`${x.to===DEPOT?'Retour au dépôt':'Sortie du dépôt'} à ${ft(x.a)}`:x.k==='course'?`Départ course ${x.n} à ${ft(x.a)}`:x.k==='batt'?`Battement jusqu’à ${ft(x.b)}`:`Fin de service à ${ft(x.a)}`;
 const btnOf=x=>x.k==='prep'?'Prise de service':x.k==='hlp'?(x.to===DEPOT?'Retour au dépôt':'Sortie du dépôt'):x.k==='course'?`Départ course ${x.n}`:x.k==='batt'?'Début du battement':'Fin de service';
 function dstate(s,P,D){
  const nowS=(Date.now()-at(s.day,'00:00').getTime())/1000,nowM=nowS/60,cur=P.st[D.n]||null,prev=D.n>0?P.st[D.n-1]:null;
  const pan=mv(prev)?prev:(P.st.slice(D.n).find(mv)||null);
- let idx=0;if(pan&&pan===prev)pan.stops.forEach((q,i)=>{if(q.t<=nowM)idx=i});
+ let idx=0;if(pan&&pan===cur)idx=Math.min(D.stop||0,pan.stops.length-1);else if(pan&&pan===prev)idx=Math.max(0,Math.min((D.stop||1)-1,pan.stops.length-1));
  let txt='',lbl='';
  if(cur){const x=cur.a*60-nowS,a=Math.abs(Math.round(x)),h=Math.floor(a/3600),m=Math.floor(a%3600/60);txt=(x<0?'+':'')+(h?h+':':'')+String(m).padStart(2,'0')+':'+String(a%60).padStart(2,'0');lbl=x<0?'de retard : '+btnOf(cur).toLowerCase():'avant : '+btnOf(cur).toLowerCase()}
  return{nowM,cur,prev,pan,idx,txt,lbl};
@@ -503,30 +507,41 @@ function dstate(s,P,D){
 function drive(){
  const id=view().slice(6),s=SV.find(x=>x.id===id);
  if(!s||s.driver_id!==me.id)return `<div class="dv" style="display:flex;align-items:center;justify-content:center;text-align:center"><div><p class="sub">Ce service n’est pas dans tes services.</p><a class="btn" href="#services">Retour aux services</a></div></div>`;
- const P=plan(s),D=drs(id),S=dstate(s,P,D),done=D.n>=P.st.length,dl=D.delay,cls=dl>1?'late':dl<-1?'early':'ok',pan=S.pan;
+ if(!DRREADY[id]){loadDriveProgress(id);return '<div class="card">Chargement de la progression du service…</div>'}const P=plan(s),D=drs(id),S=dstate(s,P,D),done=D.n>=P.st.length,dl=D.delay,cls=dl>1?'late':dl<-1?'early':'ok',pan=S.pan;
  const left=pan?`<div class="dh">${pan.k==='hlp'?'<span class="hb">HLP</span>':lb(s.line_code)}<div><small class="mu">${pan.k==='hlp'?'Haut-le-pied':'Course '+pan.n+' · '+pan.sens} · ${esc(pan.from)} →</small><br><b style="font-size:22px">${esc(pan.to)}</b></div></div>`+pan.stops.map((q,i)=>({q,i})).reverse().map(({q,i})=>`<div class="sp ${i===S.idx?'cur':''}"><i></i><div><b>${esc(q.name)}</b>${i===0?'<small>Départ</small>':i===pan.stops.length-1?'<small>Terminus</small>':''}</div><span>${ft(q.t)}</span></div>`).join(''):`<div class="dh"><b style="font-size:20px">Aucun trajet en cours</b></div>`;
  const right=`<div class="dtop"><div class="pn ${cls}"><b>${cls==='ok'?'À l’heure':cls==='late'?'En retard':'En avance'}</b>${dl<0?'−':'+'}${Math.abs(dl)} min</div><div class="dc"><b id="dvclk">${new Date().toLocaleTimeString('fr-FR')}</b><small>Heure locale</small></div></div>
  <div class="dn2"><span style="font-size:36px">🏠</span><div class="g"><small class="mu">${S.prev?esc(S.prev.label)+' à '+ft(S.prev.a)+(S.prev.k==='prep'?' au dépôt':''):'Début de service'}</small><br><b>${done?'Service terminé':esc(bigOf(S.cur))}</b></div><div class="cdv"><b id="dvcd">${done?'':S.txt}</b><small id="dvcdl" class="mu">${done?'':esc(S.lbl)}</small></div></div>
- <button class="big" id="dvgo">${done?'Quitter le mode conduite':esc(btnOf(S.cur))}</button>
+ <button class="big" id="dvgo">${done?'Terminer le service':(S.cur&&S.cur.stops&&S.cur.stops[D.stop]?'Valider le passage : '+esc(S.cur.stops[D.stop].name):esc(btnOf(S.cur)))}</button>
  <div class="chips"><span>Service ${esc(s.id)}</span><span>Fin de service ${ft(P.t0+P.tot)}</span></div>
  <div class="dd"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="margin:0">Déroulé du service</h2><span class="mu">Espace ou Entrée : valider l’étape</span></div>${P.st.map((x,i)=>`<div class="di ${i<D.n?'done':i===D.n?'now':''}"><div><b>${esc(x.k==='course'?`Course ${x.n} · ${x.from} → ${x.to}`:x.k==='hlp'?`Haut-le-pied · ${x.from} → ${x.to}`:x.label)}</b><small>${x.k==='prep'?'checklist':x.k==='fin'?'Remisage du véhicule':x.k==='batt'?'au terminus':x.k==='course'?(x.sens==='A'?'aller':'retour'):'trajet à vide'}</small></div><span class="t">${i<D.n?'✓ ':''}${x.k==='prep'||x.k==='fin'?ft(x.a):ft(x.a)+' → '+ft(x.b)}</span></div>`).join('')}</div>`;
  return `<div class="dv"><div class="dr"><button class="rb on" title="Conduite">➤</button><a class="rb" href="#messages" title="Messages">✉</a><button class="rb" id="dvreset" title="Recommencer le déroulé">↺</button><button class="rb x" id="dvquit" title="Quitter" style="margin-top:auto">✕</button></div><div class="dl" data-idx="${S.idx}">${left}</div><div class="dm">${right}</div></div>`;
 }
-function dvalid(){
- const id=view().slice(6),s=SV.find(x=>x.id===id);if(!s)return;
- const P=plan(s),D=drs(id);
- if(D.n>=P.st.length){location.hash='s-'+id;return}
- const x=P.st[D.n],nowM=(Date.now()-at(s.day,'00:00').getTime())/60000;
- D.delay=Math.round(nowM-x.a);D.log.push({i:D.n,m:Math.round(nowM)});D.n++;drsave(id);driveRender();
- if(D.n>=P.st.length)toast('Service terminé. Bonne fin de journée !',1);
+async function dvalid(){
+ const id=view().slice(6),s=SV.find(x=>x.id===id);if(!s||s.driver_id!==me.id)return;const P=plan(s),D=drs(id);
+ if(D.n>=P.st.length){const r=await sb.rpc('tc_complete_service',{p_service_id:id});if(r.error){toast(r.error.message);return}toast('Service terminé. La notification Discord sera envoyée si le webhook est configuré.',true);location.hash='s-'+id;return}
+ const x=P.st[D.n];
+ if(x.stops&&D.stop<x.stops.length){
+  const q=x.stops[D.stop],base=new Date(`${s.day}T00:00:00`),scheduled=new Date(base.getTime()+q.t*60000);
+  const r=await sb.rpc('tc_record_service_passage',{p_service_id:id,p_step_index:D.n,p_stop_index:D.stop,p_stop_name:q.name,p_scheduled_at:scheduled.toISOString()});
+  if(r.error){toast(r.error.message);return}
+  D.delay=r.data&&r.data[0]?r.data[0].delay_minutes:0;D.stop++;
+  if(D.stop>=x.stops.length){D.n++;D.stop=0}
+ }else{
+  const base=new Date(`${s.day}T00:00:00`),scheduled=new Date(base.getTime()+x.a*60000);
+  const r=await sb.rpc('tc_record_service_passage',{p_service_id:id,p_step_index:D.n,p_stop_index:0,p_stop_name:x.label||x.from||'Étape de service',p_scheduled_at:scheduled.toISOString()});
+  if(r.error){toast(r.error.message);return}D.n++;D.stop=0;
+ }
+ await drsave(id);driveRender();
+ if(D.n>=P.st.length)toast('Toutes les étapes sont validées. Appuie encore pour terminer le service.',true);
 }
+
 function driveRender(){$('#app').innerHTML=drive();bindDrive()}
 function bindDrive(){
  const g=$('#dvgo');if(g)g.onclick=dvalid;
  const q=$('#dvquit');if(q)q.onclick=()=>{location.hash='s-'+view().slice(6)};
  const r=$('#dvreset');if(r)r.onclick=()=>{
   if(!r.dataset.c){r.dataset.c='1';r.textContent='?';toast('Clique encore pour recommencer le déroulé.');setTimeout(()=>{r.dataset.c='';r.textContent='↺'},4000);return}
-  const id=view().slice(6);DR[id]={n:0,delay:0,log:[]};drsave(id);driveRender();
+  const id=view().slice(6);DR[id]={n:0,delay:0,log:[],stop:0};drsave(id).then(driveRender);
  };
 }
 function driveTick(){
@@ -541,11 +556,12 @@ function admin(){
  let b;const npend=Object.values(PR).filter(p=>!p.approved).length;
  if(adm==='lines')b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${L.length} lignes</p><button class="btn p" onclick="lineDlg()">Ajouter une ligne</button></div>`+L.map(x=>`<div class="sv" style="cursor:default">${lb(x.code)}<div class="i"><b>${esc(x.terminus_a||'?')} ⇄ ${esc(x.terminus_b||'?')}</b><small>${ST.filter(s=>s.line_code===x.code).length} arrêts intermédiaires · course ${trj(x)[0]} min · repos ${trj(x)[1]} min</small></div><button class="btn" onclick="lineDlg('${esc(x.code)}')">Modifier</button></div>`).join('');
  else if(adm==='services'){const size=100,pageCount=Math.max(1,Math.ceil(SV.length/size));svcPage=Math.min(svcPage,pageCount-1);const shown=SV.slice(svcPage*size,(svcPage+1)*size);b=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="sub" style="margin:0">${SV.length.toLocaleString('fr-FR')} services · page ${svcPage+1}/${pageCount}</p><button class="btn p" onclick="svcDlg()">Ajouter un service</button></div>`+shown.map(s=>`<div class="sv" style="cursor:default">${lb(s.line_code)}<div class="i"><b>Service ${esc(s.id)}</b> · ${fd(s.day)}<small>${hm(s.start_time)} – ${hm(s.end_time)} · ${s.driver_id&&PR[s.driver_id]?esc(PR[s.driver_id].prenom+' '+PR[s.driver_id].nom):'À pourvoir'} · ${esc(vehText(s)||'Véhicule non affecté')}</small></div><button class="btn" onclick="svcDlg('${esc(s.id)}')">Modifier</button></div>`).join('')+`<div class="row" style="justify-content:center;margin-top:14px"><button class="btn" data-sp="-1" ${svcPage===0?'disabled':''}>Précédent</button><span class="mu">${(svcPage*size+1).toLocaleString('fr-FR')}–${Math.min((svcPage+1)*size,SV.length).toLocaleString('fr-FR')} sur ${SV.length.toLocaleString('fr-FR')}</span><button class="btn" data-sp="1" ${svcPage>=pageCount-1?'disabled':''}>Suivant</button></div>`;}
+ else if(adm==='auth')b=`<p class="sub">Coche les lignes autorisées pour chaque conducteur. Les administrateurs ont automatiquement accès à toutes les lignes.</p>`+Object.values(PR).filter(p=>p.approved&&p.role!=='admin').map(p=>`<div class="sv" style="cursor:default;display:block"><b>${esc(p.prenom+' '+p.nom)}</b> <small>${esc(p.matricule||'')}</small><div class="row" style="margin-top:8px">${L.map(l=>`<label style="margin:0;display:flex;align-items:center;gap:5px"><input type="checkbox" data-hab-driver="${p.id}" data-hab-line="${esc(l.code)}" ${HAB.some(a=>a.driver_id===p.id&&a.line_code===l.code)?'checked':''}>${esc(l.code)}</label>`).join('')}</div></div>`).join('')||'<p class="sub">Aucun conducteur approuvé.</p>';
  else if(adm==='fleet')b=`<div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b>${VEH.length} véhicules au parc</b><p class="sub" style="margin:2px 0 0">Affectations calculées selon les lignes, les horaires et les disponibilités simultanées.</p></div><button class="btn p" id="autoFleet">Affecter automatiquement</button></div>`+VEH.map(v=>`<div class="sv" style="cursor:default"><span class="ln">${esc(v.fleet_number)}</span><div class="i"><b>${esc(v.model)}</b><small>${esc(v.operator)} · ${esc(v.category)}${v.length_m?' · '+esc(v.length_m)+' m':''}${v.doors?' · '+esc(v.doors)+' portes':''}${v.active?'':' · Non disponible'}</small></div></div>`).join('');
  else if(adm==='pending'){const w=Object.values(PR).filter(p=>!p.approved);b=w.length?w.map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>Matricule : ${esc(p.matricule)}</small></div><button class="btn p" data-ok="${p.id}">Valider</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Refuser</button></div>`).join(''):'<p class="sub">Aucun compte en attente.</p>'}
  else b=Object.values(PR).filter(p=>p.approved).map(p=>`<div class="sv" style="cursor:default"><div class="i"><b>${esc(p.prenom)} ${esc(p.nom)}</b><small>${esc(p.matricule)} · ${p.role==='admin'?'administrateur':'conducteur'}</small></div>${p.id===me.id?'':`<button class="btn" data-role="${p.id}" data-to="${p.role==='admin'?'driver':'admin'}">${p.role==='admin'?'Retirer admin':'Passer admin'}</button><button class="btn" data-del="${p.id}" style="color:var(--rd)">Supprimer</button>`}</div>`).join('');
  const T=(k,t)=>`<button data-a="${k}" class="${adm===k?'on':''}">${t}</button>`;
- return `<h1>Administration</h1><p class="sub">Lignes, services, parc automobile et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('fleet','Parc véhicules')}${T('pending','En attente ('+npend+')')}${T('users','Conducteurs existants')}</div><div class="card">${b}</div>`;
+ return `<h1>Administration</h1><p class="sub">Lignes, services, parc automobile et conducteurs.</p><div class="tabs" id="at">${T('lines','Lignes')}${T('services','Services')}${T('auth','Habilitations')}${T('fleet','Parc véhicules')}${T('pending','En attente ('+npend+')')}${T('users','Conducteurs existants')}</div><div class="card">${b}</div>`;
 }
 
 function fleetCandidates(line,first){
@@ -600,29 +616,22 @@ async function autoFleet(){
 }
 
 function lineDlg(code){
- const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:''};
- const names=code?ST.filter(s=>s.line_code===code).map(s=>s.name).join('\n'):'';
- dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" placeholder="ex. L7"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><div class="two"><label>Durée d’une course (min)<input id="l7" type="number" min="1" value="${trj(x)[0]}" style="width:100%"></label><label>Repos au terminus (min)<input id="l8" type="number" min="0" value="${trj(x)[1]}" style="width:100%"></label></div><label>Arrêts intermédiaires (un par ligne, dans l’ordre)<textarea id="l6">${esc(names)}</textarea></label><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ const x=code?L.find(y=>y.code===code):{code:'',bg:'#3b82f6',fg:'#111111',terminus_a:'',terminus_b:'',course_min:10,repos_min:5,terminal_travel_min:null};
+ const rows=code?ST.filter(s=>s.line_code===code).sort((a,b)=>a.pos-b.pos).map(s=>`${s.name} ; ${s.travel_min??''}`).join('\n'):'';
+ dlg(`<h2>${code?'Modifier la ligne '+esc(code):'Ajouter une ligne'}</h2><form id="lf"><div class="row"><label>Code<br><input id="l1" value="${esc(x.code)}" placeholder="ex. A"></label><label>Fond<br><input id="l2" type="color" value="${esc(x.bg)}"></label><label>Texte<br><input id="l3" type="color" value="${esc(x.fg)}"></label></div><div class="two"><label>Terminus de départ<input id="l4" value="${esc(x.terminus_a)}" style="width:100%"></label><label>Terminus d’arrivée<input id="l5" value="${esc(x.terminus_b)}" style="width:100%"></label></div><div class="two"><label>Durée de secours d’une course (min)<input id="l7" type="number" min="1" value="${trj(x)[0]}" style="width:100%"></label><label>Repos au terminus (min)<input id="l8" type="number" min="0" value="${trj(x)[1]}" style="width:100%"></label></div><label>Arrêts intermédiaires — un par ligne : <code>Nom de l’arrêt ; minutes depuis le précédent</code><textarea id="l6" placeholder="Arrêt 1 ; 3&#10;Arrêt 2 ; 2">${esc(rows)}</textarea></label><label>Temps du dernier arrêt au terminus d’arrivée (min)<input id="l9" type="number" min="1" value="${x.terminal_travel_min??''}" placeholder="ex. 2" style="width:100%"></label><p class="mu">Les temps permettent de calculer les horaires de passage dans les deux sens. Laisse les temps vides pour conserver une répartition automatique de secours.</p><p class="err" id="le" role="alert"></p><div class="row" style="justify-content:flex-end">${code?'<button type="button" class="btn" id="ld" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
  const er=m=>$('#le').textContent=m;
- $('#lf').onsubmit=async e=>{e.preventDefault();
-  const c=$('#l1').value.replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
-  if(!c)return er('Saisis un code de ligne.');
-  if(c!==code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
-  const cm=parseInt($('#l7').value),rm=parseInt($('#l8').value);
-  if(!(cm>=1)||!(rm>=0))return er('Saisis une durée de course (1 min minimum) et un repos (0 min minimum).');
-  const o={code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim(),course_min:cm,repos_min:rm};
-  let r=await(code&&c!==code?sb.from('lines').update(o).eq('code',code):sb.from('lines').upsert(o));
-  if(r.error)return er(r.error.message);
-  r=await sb.from('stops').delete().eq('line_code',c);if(r.error)return er(r.error.message);
-  const n=$('#l6').value.split('\n').map(v=>v.trim()).filter(Boolean);
-  if(n.length){r=await sb.from('stops').insert(n.map((name,i)=>({line_code:c,pos:i+1,name})));if(r.error)return er(r.error.message)}
-  close();await load();render();
- };
- const d=$('#ld');if(d)twice(d,async()=>{if(await act(sb.from('lines').delete().eq('code',code)))close()});
+ $('#lf').onsubmit=async e=>{e.preventDefault();const c=$('#l1').value.replace(/[^A-Za-z0-9-]/g,'').toUpperCase();if(!c)return er('Saisis un code de ligne.');if(c!==code&&L.some(y=>y.code===c))return er('Cette ligne existe déjà.');
+  const cm=parseInt($('#l7').value),rm=parseInt($('#l8').value),terminal=$('#l9').value.trim()===''?null:parseInt($('#l9').value);if(!(cm>=1)||!(rm>=0))return er('Durée de secours et repos invalides.');if(terminal!==null&&!(terminal>0))return er('Le dernier tronçon doit être supérieur à 0 minute.');
+  const parsed=$('#l6').value.split('\n').map(v=>v.trim()).filter(Boolean).map((v,i)=>{const a=v.split(';');return{name:a[0].trim(),travel_min:a.length>1&&a[1].trim()!==''?Number(a[1].trim()):null,pos:i+1}});if(parsed.some(v=>!v.name||(v.travel_min!==null&&(!Number.isInteger(v.travel_min)||v.travel_min<1))))return er('Format invalide : Nom de l’arrêt ; minutes entières positives.');
+  const o={code:c,bg:$('#l2').value,fg:$('#l3').value,terminus_a:$('#l4').value.trim(),terminus_b:$('#l5').value.trim(),course_min:cm,repos_min:rm,terminal_travel_min:terminal};let r=await(code&&c!==code?sb.from('lines').update(o).eq('code',code):sb.from('lines').upsert(o));if(r.error)return er(r.error.message);
+  r=await sb.from('stops').delete().eq('line_code',c);if(r.error)return er(r.error.message);if(parsed.length){r=await sb.from('stops').insert(parsed.map(v=>({line_code:c,pos:v.pos,name:v.name,travel_min:v.travel_min})));if(r.error)return er(r.error.message)}
+  close();await load();render();toast('Ligne et horaires enregistrés.',true);
+ };const d=$('#ld');if(d)twice(d,async()=>{if(await act(sb.from('lines').delete().eq('code',code)))close()});
 }
+
 function svcDlg(id){
  const s=id?SV.find(x=>x.id===id):{id:'',line_code:L[0]?L[0].code:'',day:today(),start_time:'08:00',end_time:'12:00',detail:'Dépôt · 1 tour',driver_id:null};
- dlg(`<h2>${id?'Modifier':'Ajouter'} un service</h2><form id="sf"><div class="row"><label>Numéro<br><input id="s1" value="${esc(s.id)}" ${id?'readonly':''}></label><label>Ligne<br><select id="s2">${L.map(x=>`<option ${x.code===s.line_code?'selected':''}>${esc(x.code)}</option>`).join('')}</select></label><label>Jour<br><input id="s3" type="date" value="${esc(s.day)}"></label></div><div class="row"><label>Début<br><input id="s4" type="time" value="${hm(s.start_time)}"></label><label>Fin<br><input id="s5" type="time" value="${hm(s.end_time)}"></label></div><label>Détail<input id="s6" value="${esc(s.detail)}" style="width:100%"></label><label>Conducteur<br><select id="s7"><option value="">À pourvoir</option>${Object.values(PR).filter(p=>p.approved).map(p=>`<option value="${p.id}" ${p.id===s.driver_id?'selected':''}>${esc(p.prenom+' '+p.nom)}</option>`).join('')}</select></label><label>Véhicule(s) affecté(s) <span class="mu">(Ctrl ou Cmd pour plusieurs véhicules)</span><br><select id="s8" multiple size="5" style="width:100%">${VEH.filter(v=>v.active).map(v=>`<option value="${v.fleet_number}" ${(s.vehicle_numbers||[]).includes(v.fleet_number)?'selected':''}>${esc(v.fleet_number+' · '+v.model)}</option>`).join('')}</select></label><p class="err" id="se" role="alert"></p><div class="row" style="justify-content:flex-end">${id?'<button type="button" class="btn" id="sd" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
+ dlg(`<h2>${id?'Modifier':'Ajouter'} un service</h2><form id="sf"><div class="row"><label>Numéro<br><input id="s1" value="${esc(s.id)}" ${id?'readonly':''}></label><label>Ligne<br><select id="s2">${L.map(x=>`<option ${x.code===s.line_code?'selected':''}>${esc(x.code)}</option>`).join('')}</select></label><label>Jour<br><input id="s3" type="date" value="${esc(s.day)}"></label></div><div class="row"><label>Début<br><input id="s4" type="time" value="${hm(s.start_time)}"></label><label>Fin<br><input id="s5" type="time" value="${hm(s.end_time)}"></label></div><label>Détail<input id="s6" value="${esc(s.detail)}" style="width:100%"></label><label>Conducteur<br><select id="s7"><option value="">À pourvoir</option>${Object.values(PR).filter(p=>p.approved&&(p.role==='admin'||authorized(p.id,s.line_code))).map(p=>`<option value="${p.id}" ${p.id===s.driver_id?'selected':''}>${esc(p.prenom+' '+p.nom)}</option>`).join('')}</select></label><label>Véhicule(s) affecté(s) <span class="mu">(Ctrl ou Cmd pour plusieurs véhicules)</span><br><select id="s8" multiple size="5" style="width:100%">${VEH.filter(v=>v.active).map(v=>`<option value="${v.fleet_number}" ${(s.vehicle_numbers||[]).includes(v.fleet_number)?'selected':''}>${esc(v.fleet_number+' · '+v.model)}</option>`).join('')}</select></label><p class="err" id="se" role="alert"></p><div class="row" style="justify-content:flex-end">${id?'<button type="button" class="btn" id="sd" style="color:var(--rd);margin-right:auto">Supprimer</button>':''}<button type="button" class="btn" onclick="close()">Annuler</button><button class="btn p">Enregistrer</button></div></form>`);
  const er=m=>$('#se').textContent=m;
  $('#sf').onsubmit=async e=>{e.preventDefault();
   const n=$('#s1').value.replace(/[^A-Za-z0-9-]/g,'');
@@ -665,6 +674,7 @@ function render(){
  document.querySelectorAll('.sv[data-id],.chip[data-id],.js[data-id]').forEach(e=>{e.onclick=()=>detail(e.dataset.id);e.onkeydown=k=>{if(k.key==='Enter')e.click()}});
  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
  document.querySelectorAll('#at button').forEach(b=>b.onclick=()=>{adm=b.dataset.a;if(adm==='services')svcPage=0;render()});
+ document.querySelectorAll('[data-hab-driver]').forEach(c=>c.onchange=async()=>{const o={driver_id:c.dataset.habDriver,line_code:c.dataset.habLine};const r=c.checked?await sb.from('line_authorizations').insert(o):await sb.from('line_authorizations').delete().match(o);if(r.error){c.checked=!c.checked;toast(r.error.message);return}if(c.checked)HAB.push(o);else HAB=HAB.filter(a=>!(a.driver_id===o.driver_id&&a.line_code===o.line_code));toast('Habilitation mise à jour.',true)});
  document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{svcPage+=Number(b.dataset.sp);render()});
   const af=$('#autoFleet');if(af)af.onclick=()=>{if(confirm('Recalculer les affectations de véhicules pour tous les services ? Les affectations actuelles seront remplacées.'))autoFleet()};
  document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{pmo+=+b.dataset.mp;render()});
